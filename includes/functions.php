@@ -172,13 +172,7 @@ function checkMpesaStatus($checkoutRequestID)
 {
     // In production: query Daraga API status
     return 'success'; // simulated
-}
-
-/**
- * Get dashboard stats
- */
-function getDashboardStats()
-{
+} {
     $db = getDB();
     $stats = [];
 

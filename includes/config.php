@@ -14,7 +14,15 @@ define('DB_CHARSET', 'utf8mb4');
 // Site configuration
 define('SITE_NAME', 'Elpis Counselling Centre');
 define('SITE_TAGLINE', 'Your Journey to Emotional Wellbeing Begins Here');
-define('SITE_URL', 'http://127.0.0.1/Project-Elpis');
+
+// Auto-detect base URL dynamically (works regardless of subfolder)
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? '127.0.0.1';
+$docRoot = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
+$scriptDir = str_replace('\\', '/', __DIR__);
+$relativePath = str_replace($docRoot, '', $scriptDir);
+$basePath = dirname($relativePath);
+define('SITE_URL', $protocol . '://' . $host . $basePath);
 define('ADMIN_EMAIL', 'info@elpiscounselling.co.ke');
 
 // M-Pesa Daraja API Configuration (Sandbox)
