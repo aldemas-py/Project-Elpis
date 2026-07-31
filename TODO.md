@@ -34,7 +34,19 @@
 - [X] Create Manage Testimonials (admin/manage_testimonials.php)
 - [X] Create Admin Logout (admin/logout.php)
 
-## Phase 6: Setup & Final Touches
+## Phase 6: Documentation
+- [X] Create comprehensive README with:
+  - [X] Compliance & Policy (WHO 2026 guidelines, Data Protection Act 2019, ethical safeguards)
+  - [X] Production server installation (Ubuntu/Debian, Apache, MySQL, SSL, cron, email)
+  - [X] Security hardening checklist (firewall, Fail2Ban, permissions, uploads protection)
+  - [X] M-Pesa integration (sandbox + production)
+  - [X] Database schema documentation
+  - [X] File structure documentation
+  - [X] Color palette & design system
+  - [X] Admin panel documentation
+  - [X] Maintenance & troubleshooting guide
+
+## Phase 7: Setup & Final Touches
 - [ ] Run sql/database.sql in phpMyAdmin to create database and tables
 - [ ] Create uploads/ directory (auto-created on first image upload)
 - [ ] Default admin credentials: username = admin, password = admin123
