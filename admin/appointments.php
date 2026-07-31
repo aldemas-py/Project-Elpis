@@ -10,7 +10,6 @@ requireAdmin();
 $db = getDB();
 $message = '';
 
-// Update status
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $appt_id = (int)$_POST['appointment_id'];
     $status = $_POST['status'];
@@ -20,6 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 }
 
 $appointments = $db->query("SELECT * FROM appointments ORDER BY created_at DESC")->fetchAll();
+include __DIR__ . '/../includes/header.php';
+$isAdminPage = true;
 ?>
 <style>
     .admin-layout {
@@ -64,6 +65,13 @@ $appointments = $db->query("SELECT * FROM appointments ORDER BY created_at DESC"
         padding: 2rem;
         background: #FAF8F2;
         min-height: 100vh;
+    }
+
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
     }
 
     .admin-header h1 {
@@ -127,30 +135,26 @@ $appointments = $db->query("SELECT * FROM appointments ORDER BY created_at DESC"
     }
 </style>
 
-<?php include __DIR__ . '/../includes/header.php'; ?>
-
 <div class="admin-layout">
     <div class="admin-sidebar">
         <h3>Admin Panel</h3>
-        <a href="<?php echo SITE_URL; ?>/admin/dashboard.php">&#9632; Dashboard</a>
-        <a href="<?php echo SITE_URL; ?>/admin/appointments.php" class="active">&#9997; Appointments</a>
-        <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php">&#128218; Articles</a>
-        <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">&#128197; Events</a>
-        <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php">&#9733; Testimonials</a>
+        <a href="<?php echo SITE_URL; ?>/admin/dashboard.php">Dashboard</a>
+        <a href="<?php echo SITE_URL; ?>/admin/appointments.php" class="active">Appointments</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_services.php">Services</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php">Articles</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">Events</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php">Testimonials</a>
         <hr style="border-color:rgba(255,255,255,0.1);margin:1.5rem 0;">
-        <a href="<?php echo SITE_URL; ?>/index.php">&#8592; View Site</a>
-        <a href="<?php echo SITE_URL; ?>/admin/logout.php">&#128682; Logout</a>
+        <a href="<?php echo SITE_URL; ?>/index.php">View Site</a>
+        <a href="<?php echo SITE_URL; ?>/admin/logout.php">Logout</a>
     </div>
-
     <div class="admin-content">
         <div class="admin-header">
             <h1>Appointments</h1>
         </div>
-
         <?php if ($message): ?>
             <div class="alert alert-success"><?php echo h($message); ?></div>
         <?php endif; ?>
-
         <div class="table-container">
             <?php if (count($appointments) > 0): ?>
                 <table>
@@ -172,10 +176,7 @@ $appointments = $db->query("SELECT * FROM appointments ORDER BY created_at DESC"
                             <tr>
                                 <td><?php echo $i + 1; ?></td>
                                 <td><strong><?php echo h($appt['name']); ?></strong></td>
-                                <td>
-                                    <?php echo h($appt['email']); ?><br>
-                                    <small><?php echo h($appt['phone']); ?></small>
-                                </td>
+                                <td><?php echo h($appt['email']); ?><br><small><?php echo h($appt['phone']); ?></small></td>
                                 <td><?php echo h($appt['service'] ?: '-'); ?></td>
                                 <td><?php echo $appt['preferred_date'] ? formatDate($appt['preferred_date']) : '-'; ?></td>
                                 <td><small><?php echo h(truncateText($appt['message'], 50)); ?></small></td>
@@ -212,6 +213,5 @@ $appointments = $db->query("SELECT * FROM appointments ORDER BY created_at DESC"
             <?php endif; ?>
         </div>
     </div>
-</div>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>

@@ -172,7 +172,76 @@ function checkMpesaStatus($checkoutRequestID)
 {
     // In production: query Daraga API status
     return 'success'; // simulated
-} {
+}
+
+/**
+ * Upload an image file and return the filename
+ */
+function uploadImage($file, $existingFile = null)
+{
+    $uploadDir = __DIR__ . '/../uploads/';
+
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
+        return $existingFile;
+    }
+
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    $maxSize = 5 * 1024 * 1024;
+
+    if (!in_array($file['type'], $allowedTypes)) {
+        throw new Exception('Invalid file type. Allowed: JPG, PNG, GIF, WEBP');
+    }
+
+    if ($file['size'] > $maxSize) {
+        throw new Exception('File too large. Maximum size is 5MB.');
+    }
+
+    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $filename = uniqid('img_') . '_' . time() . '.' . strtolower($ext);
+    $destPath = $uploadDir . $filename;
+
+    if (move_uploaded_file($file['tmp_name'], $destPath)) {
+        if ($existingFile && file_exists($uploadDir . $existingFile)) {
+            unlink($uploadDir . $existingFile);
+        }
+        return $filename;
+    }
+
+    throw new Exception('Failed to upload file.');
+}
+
+/**
+ * Delete an uploaded image
+ */
+function deleteImage($filename)
+{
+    if ($filename) {
+        $path = __DIR__ . '/../uploads/' . $filename;
+        if (file_exists($path)) {
+            unlink($path);
+        }
+    }
+}
+
+/**
+ * Get all services (including inactive for admin)
+ */
+function getAllServices()
+{
+    $db = getDB();
+    $stmt = $db->query("SELECT * FROM services ORDER BY display_order ASC");
+    return $stmt->fetchAll();
+}
+
+/**
+ * Get dashboard stats
+ */
+function getDashboardStats()
+{
     $db = getDB();
     $stats = [];
 

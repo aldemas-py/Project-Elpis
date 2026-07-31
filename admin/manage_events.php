@@ -24,16 +24,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_event'])) {
     $is_published = isset($_POST['is_published']) ? 1 : 0;
 
     if ($title && $event_date) {
-        if ($id > 0) {
-            $stmt = $db->prepare("UPDATE events SET title=?, description=?, event_date=?, event_time=?, venue=?, price=?, max_participants=?, is_published=? WHERE id=?");
-            $stmt->execute([$title, $description, $event_date, $event_time, $venue, $price, $max_participants, $is_published, $id]);
-            $message = 'Event updated successfully.';
-        } else {
-            $stmt = $db->prepare("INSERT INTO events (title, description, event_date, event_time, venue, price, max_participants, is_published) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$title, $description, $event_date, $event_time, $venue, $price, $max_participants, $is_published]);
-            $message = 'Event created successfully.';
+        try {
+            $image = null;
+            if ($id > 0) {
+                $stmt = $db->prepare("SELECT image FROM events WHERE id = ?");
+                $stmt->execute([$id]);
+                $existing_image = $stmt->fetchColumn();
+                $image = uploadImage($_FILES['image'] ?? [], $existing_image);
+            } else {
+                $image = uploadImage($_FILES['image'] ?? []);
+            }
+
+            if ($id > 0) {
+                $stmt = $db->prepare("UPDATE events SET title=?, description=?, event_date=?, event_time=?, venue=?, price=?, image=?, max_participants=?, is_published=? WHERE id=?");
+                $stmt->execute([$title, $description, $event_date, $event_time, $venue, $price, $image, $max_participants, $is_published, $id]);
+                $message = 'Event updated successfully.';
+            } else {
+                $stmt = $db->prepare("INSERT INTO events (title, description, event_date, event_time, venue, price, image, max_participants, is_published) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$title, $description, $event_date, $event_time, $venue, $price, $image, $max_participants, $is_published]);
+                $message = 'Event created successfully.';
+            }
+            $messageType = 'success';
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+            $messageType = 'error';
         }
-        $messageType = 'success';
     } else {
         $message = 'Title and date are required.';
         $messageType = 'error';
@@ -43,6 +58,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_event'])) {
 // Handle Delete
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
+    $stmt = $db->prepare("SELECT image FROM events WHERE id = ?");
+    $stmt->execute([$id]);
+    $img = $stmt->fetchColumn();
+    if ($img) deleteImage($img);
     $stmt = $db->prepare("DELETE FROM events WHERE id = ?");
     $stmt->execute([$id]);
     $message = 'Event deleted successfully.';
@@ -59,7 +78,6 @@ if (isset($_GET['edit'])) {
 }
 
 $events = $db->query("SELECT * FROM events ORDER BY event_date DESC")->fetchAll();
-// Get bookings count per event
 $bookingCounts = [];
 $bStmt = $db->query("SELECT event_id, COUNT(*) as cnt FROM event_bookings GROUP BY event_id");
 while ($row = $bStmt->fetch()) {
@@ -111,6 +129,13 @@ while ($row = $bStmt->fetch()) {
         min-height: 100vh;
     }
 
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
     .admin-header h1 {
         font-size: 1.5rem;
     }
@@ -159,6 +184,13 @@ while ($row = $bStmt->fetch()) {
     .btn-danger:hover {
         background: #c82333;
     }
+
+    .preview-img {
+        width: 60px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
 </style>
 
 <?php include __DIR__ . '/../includes/header.php'; ?>
@@ -168,6 +200,7 @@ while ($row = $bStmt->fetch()) {
         <h3>Admin Panel</h3>
         <a href="<?php echo SITE_URL; ?>/admin/dashboard.php">&#9632; Dashboard</a>
         <a href="<?php echo SITE_URL; ?>/admin/appointments.php">&#9997; Appointments</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_services.php">&#9733; Services</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php">&#128218; Articles</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_events.php" class="active">&#128197; Events</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php">&#9733; Testimonials</a>
@@ -188,7 +221,7 @@ while ($row = $bStmt->fetch()) {
 
         <?php if ($editEvent || isset($_GET['new'])): ?>
             <div class="form-container">
-                <form method="POST" action="">
+                <form method="POST" action="" enctype="multipart/form-data">
                     <input type="hidden" name="event_id" value="<?php echo $editEvent['id'] ?? 0; ?>">
 
                     <div class="form-group">
@@ -209,47 +242,58 @@ while ($row = $bStmt->fetch()) {
                                 value="<?php echo h($editEvent['event_time'] ?? ''); ?>"
                                 placeholder="e.g., 10:00 AM - 12:00 PM">
                         </div>
-                    </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="venue">Venue</label>
-                            <input type="text" id="venue" name="venue" class="form-control"
-                                value="<?php echo h($editEvent['venue'] ?? ''); ?>">
-                        </div>
-                        <div class="form-group">
-                            <label for="price">Price (KES)</label>
-                            <input type="number" id="price" name="price" class="form-control" step="0.01"
-                                value="<?php echo $editEvent['price'] ?? 0; ?>">
-                            <small style="color:#999;">Set to 0 for free events</small>
-                        </div>
-                    </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="venue">Venue</label>
+                                <input type="text" id="venue" name="venue" class="form-control"
+                                    value="<?php echo h($editEvent['venue'] ?? ''); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="price">Price (KES)</label>
+                                <input type="number" id="price" name="price" class="form-control" step="0.01"
+                                    value="<?php echo $editEvent['price'] ?? 0; ?>">
+                                <small style="color:#999;">Set to 0 for free events</small>
+                            </div>
 
-                    <div class="form-group">
-                        <label for="max_participants">Max Participants</label>
-                        <input type="number" id="max_participants" name="max_participants" class="form-control"
-                            value="<?php echo $editEvent['max_participants'] ?? ''; ?>"
-                            placeholder="Leave empty for unlimited">
-                    </div>
+                            <div class="form-group">
+                                <label for="image">Event Image</label>
+                                <input type="file" id="image" name="image" class="form-control" accept="image/*">
+                                <?php if ($editEvent && $editEvent['image']): ?>
+                                    <div style="margin-top:0.5rem;">
+                                        <img src="<?php echo SITE_URL; ?>/uploads/<?php echo h($editEvent['image']); ?>"
+                                            class="preview-img" alt="Current image">
+                                        <small style="color:#999;"> Current image. Upload new to replace.</small>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
 
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea id="description" name="description" class="form-control"
-                            rows="5"><?php echo h($editEvent['description'] ?? ''); ?></textarea>
-                    </div>
+                            <div class="form-group">
+                                <label for="max_participants">Max Participants</label>
+                                <input type="number" id="max_participants" name="max_participants" class="form-control"
+                                    value="<?php echo $editEvent['max_participants'] ?? ''; ?>"
+                                    placeholder="Leave empty for unlimited">
+                            </div>
 
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="is_published" value="1"
-                                <?php echo ($editEvent && $editEvent['is_published']) ? 'checked' : ''; ?>>
-                            Publish (visible on website)
-                        </label>
-                    </div>
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea id="description" name="description" class="form-control"
+                                    rows="5"><?php echo h($editEvent['description'] ?? ''); ?></textarea>
+                            </div>
 
-                    <div style="display:flex;gap:1rem;">
-                        <button type="submit" name="save_event" class="btn btn-primary">Save Event</button>
-                        <a href="<?php echo SITE_URL; ?>/admin/manage_events.php" class="btn btn-secondary">Cancel</a>
-                    </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="is_published" value="1"
+                                        <?php echo ($editEvent && $editEvent['is_published']) ? 'checked' : ''; ?>>
+                                    Publish (visible on website)
+                                </label>
+                            </div>
+
+                            <div style="display:flex;gap:1rem;">
+                                <button type="submit" name="save_event" class="btn btn-primary">Save Event</button>
+                                <a href="<?php echo SITE_URL; ?>/admin/manage_events.php"
+                                    class="btn btn-secondary">Cancel</a>
+                            </div>
                 </form>
             </div>
         <?php endif; ?>
@@ -260,6 +304,7 @@ while ($row = $bStmt->fetch()) {
                 <table>
                     <thead>
                         <tr>
+                            <th>Image</th>
                             <th>Title</th>
                             <th>Date</th>
                             <th>Price</th>
@@ -272,6 +317,14 @@ while ($row = $bStmt->fetch()) {
                         <?php foreach ($events as $event): ?>
                             <?php $past = strtotime($event['event_date']) < time(); ?>
                             <tr style="<?php echo $past ? 'opacity:0.6;' : ''; ?>">
+                                <td>
+                                    <?php if ($event['image']): ?>
+                                        <img src="<?php echo SITE_URL; ?>/uploads/<?php echo h($event['image']); ?>"
+                                            class="preview-img" alt="">
+                                    <?php else: ?>
+                                        <span style="color:#D7DDD9;">No img</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td><strong><?php echo h($event['title']); ?></strong></td>
                                 <td><?php echo formatDate($event['event_date']); ?></td>
                                 <td><?php echo $event['price'] > 0 ? 'KES ' . number_format($event['price'], 2) : 'Free'; ?>
@@ -301,6 +354,5 @@ while ($row = $bStmt->fetch()) {
             <?php endif; ?>
         </div>
     </div>
-</div>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>

@@ -23,16 +23,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_article'])) {
     $is_published = isset($_POST['is_published']) ? 1 : 0;
 
     if ($title && $content) {
-        if ($id > 0) {
-            $stmt = $db->prepare("UPDATE articles SET title=?, slug=?, content=?, excerpt=?, author=?, category=?, is_published=? WHERE id=?");
-            $stmt->execute([$title, $slug, $content, $excerpt, $author, $category, $is_published, $id]);
-            $message = 'Article updated successfully.';
-        } else {
-            $stmt = $db->prepare("INSERT INTO articles (title, slug, content, excerpt, author, category, is_published) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$title, $slug, $content, $excerpt, $author, $category, $is_published]);
-            $message = 'Article created successfully.';
+        try {
+            $image = null;
+            if ($id > 0) {
+                $stmt = $db->prepare("SELECT image FROM articles WHERE id = ?");
+                $stmt->execute([$id]);
+                $existing_image = $stmt->fetchColumn();
+                $image = uploadImage($_FILES['image'] ?? [], $existing_image);
+            } else {
+                $image = uploadImage($_FILES['image'] ?? []);
+            }
+
+            if ($id > 0) {
+                $stmt = $db->prepare("UPDATE articles SET title=?, slug=?, content=?, excerpt=?, author=?, category=?, image=?, is_published=? WHERE id=?");
+                $stmt->execute([$title, $slug, $content, $excerpt, $author, $category, $image, $is_published, $id]);
+                $message = 'Article updated successfully.';
+            } else {
+                $stmt = $db->prepare("INSERT INTO articles (title, slug, content, excerpt, author, category, image, is_published) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$title, $slug, $content, $excerpt, $author, $category, $image, $is_published]);
+                $message = 'Article created successfully.';
+            }
+            $messageType = 'success';
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+            $messageType = 'error';
         }
-        $messageType = 'success';
     } else {
         $message = 'Title and content are required.';
         $messageType = 'error';
@@ -42,6 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_article'])) {
 // Handle Delete
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
+    $stmt = $db->prepare("SELECT image FROM articles WHERE id = ?");
+    $stmt->execute([$id]);
+    $img = $stmt->fetchColumn();
+    if ($img) deleteImage($img);
     $stmt = $db->prepare("DELETE FROM articles WHERE id = ?");
     $stmt->execute([$id]);
     $message = 'Article deleted successfully.';
@@ -104,6 +123,13 @@ $articles = $db->query("SELECT * FROM articles ORDER BY created_at DESC")->fetch
         min-height: 100vh;
     }
 
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
     .admin-header h1 {
         font-size: 1.5rem;
     }
@@ -152,6 +178,13 @@ $articles = $db->query("SELECT * FROM articles ORDER BY created_at DESC")->fetch
     .btn-danger:hover {
         background: #c82333;
     }
+
+    .preview-img {
+        width: 60px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
 </style>
 
 <?php include __DIR__ . '/../includes/header.php'; ?>
@@ -161,6 +194,7 @@ $articles = $db->query("SELECT * FROM articles ORDER BY created_at DESC")->fetch
         <h3>Admin Panel</h3>
         <a href="<?php echo SITE_URL; ?>/admin/dashboard.php">&#9632; Dashboard</a>
         <a href="<?php echo SITE_URL; ?>/admin/appointments.php">&#9997; Appointments</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_services.php">&#9733; Services</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php" class="active">&#128218; Articles</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">&#128197; Events</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php">&#9733; Testimonials</a>
@@ -181,7 +215,7 @@ $articles = $db->query("SELECT * FROM articles ORDER BY created_at DESC")->fetch
 
         <?php if ($editArticle || isset($_GET['new'])): ?>
             <div class="form-container">
-                <form method="POST" action="">
+                <form method="POST" action="" enctype="multipart/form-data">
                     <input type="hidden" name="article_id" value="<?php echo $editArticle['id'] ?? 0; ?>">
 
                     <div class="form-row">
@@ -196,46 +230,57 @@ $articles = $db->query("SELECT * FROM articles ORDER BY created_at DESC")->fetch
                                 value="<?php echo h($editArticle['slug'] ?? ''); ?>"
                                 placeholder="Leave blank to auto-generate">
                         </div>
-                    </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="author">Author</label>
-                            <input type="text" id="author" name="author" class="form-control"
-                                value="<?php echo h($editArticle['author'] ?? 'Elpis Counselling Centre'); ?>">
-                        </div>
-                        <div class="form-group">
-                            <label for="category">Category</label>
-                            <input type="text" id="category" name="category" class="form-control"
-                                value="<?php echo h($editArticle['category'] ?? 'General'); ?>">
-                        </div>
-                    </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="author">Author</label>
+                                <input type="text" id="author" name="author" class="form-control"
+                                    value="<?php echo h($editArticle['author'] ?? 'Elpis Counselling Centre'); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="category">Category</label>
+                                <input type="text" id="category" name="category" class="form-control"
+                                    value="<?php echo h($editArticle['category'] ?? 'General'); ?>">
+                            </div>
 
-                    <div class="form-group">
-                        <label for="excerpt">Excerpt (Short description)</label>
-                        <textarea id="excerpt" name="excerpt" class="form-control"
-                            rows="2"><?php echo h($editArticle['excerpt'] ?? ''); ?></textarea>
-                    </div>
+                            <div class="form-group">
+                                <label for="image">Featured Image</label>
+                                <input type="file" id="image" name="image" class="form-control" accept="image/*">
+                                <?php if ($editArticle && $editArticle['image']): ?>
+                                    <div style="margin-top:0.5rem;">
+                                        <img src="<?php echo SITE_URL; ?>/uploads/<?php echo h($editArticle['image']); ?>"
+                                            class="preview-img" alt="Current image">
+                                        <small style="color:#999;"> Current image. Upload new to replace.</small>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
 
-                    <div class="form-group">
-                        <label for="content">Content *</label>
-                        <textarea id="content" name="content" class="form-control" rows="15"
-                            style="font-family:monospace;"><?php echo h($editArticle['content'] ?? ''); ?></textarea>
-                        <small style="color:#999;">HTML content supported. Use proper formatting.</small>
-                    </div>
+                            <div class="form-group">
+                                <label for="excerpt">Excerpt (Short description)</label>
+                                <textarea id="excerpt" name="excerpt" class="form-control"
+                                    rows="2"><?php echo h($editArticle['excerpt'] ?? ''); ?></textarea>
+                            </div>
 
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="is_published" value="1"
-                                <?php echo ($editArticle && $editArticle['is_published']) ? 'checked' : ''; ?>>
-                            Publish (visible to visitors)
-                        </label>
-                    </div>
+                            <div class="form-group">
+                                <label for="content">Content *</label>
+                                <textarea id="content" name="content" class="form-control" rows="15"
+                                    style="font-family:monospace;"><?php echo h($editArticle['content'] ?? ''); ?></textarea>
+                                <small style="color:#999;">HTML content supported. Use proper formatting.</small>
+                            </div>
 
-                    <div style="display:flex;gap:1rem;">
-                        <button type="submit" name="save_article" class="btn btn-primary">Save Article</button>
-                        <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php" class="btn btn-secondary">Cancel</a>
-                    </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="is_published" value="1"
+                                        <?php echo ($editArticle && $editArticle['is_published']) ? 'checked' : ''; ?>>
+                                    Publish (visible to visitors)
+                                </label>
+                            </div>
+
+                            <div style="display:flex;gap:1rem;">
+                                <button type="submit" name="save_article" class="btn btn-primary">Save Article</button>
+                                <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php"
+                                    class="btn btn-secondary">Cancel</a>
+                            </div>
                 </form>
             </div>
         <?php endif; ?>
@@ -246,6 +291,7 @@ $articles = $db->query("SELECT * FROM articles ORDER BY created_at DESC")->fetch
                 <table>
                     <thead>
                         <tr>
+                            <th>Image</th>
                             <th>Title</th>
                             <th>Author</th>
                             <th>Category</th>
@@ -257,6 +303,14 @@ $articles = $db->query("SELECT * FROM articles ORDER BY created_at DESC")->fetch
                     <tbody>
                         <?php foreach ($articles as $article): ?>
                             <tr>
+                                <td>
+                                    <?php if ($article['image']): ?>
+                                        <img src="<?php echo SITE_URL; ?>/uploads/<?php echo h($article['image']); ?>"
+                                            class="preview-img" alt="">
+                                    <?php else: ?>
+                                        <span style="color:#D7DDD9;">No img</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td><strong><?php echo h($article['title']); ?></strong></td>
                                 <td><?php echo h($article['author']); ?></td>
                                 <td><?php echo h($article['category']); ?></td>
@@ -280,6 +334,5 @@ $articles = $db->query("SELECT * FROM articles ORDER BY created_at DESC")->fetch
             <?php endif; ?>
         </div>
     </div>
-</div>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>

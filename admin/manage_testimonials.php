@@ -11,7 +11,6 @@ $db = getDB();
 $message = '';
 $messageType = '';
 
-// Handle Create/Update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_testimonial'])) {
     $id = (int)($_POST['testimonial_id'] ?? 0);
     $client_name = trim($_POST['client_name']);
@@ -37,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_testimonial'])) 
     }
 }
 
-// Handle Delete
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
     $stmt = $db->prepare("DELETE FROM testimonials WHERE id = ?");
@@ -46,7 +44,6 @@ if (isset($_GET['delete'])) {
     $messageType = 'success';
 }
 
-// Handle Toggle Approval
 if (isset($_GET['toggle'])) {
     $id = (int)$_GET['toggle'];
     $stmt = $db->prepare("UPDATE testimonials SET is_approved = NOT is_approved WHERE id = ?");
@@ -55,7 +52,6 @@ if (isset($_GET['toggle'])) {
     $messageType = 'success';
 }
 
-// Get edit data
 $editTestimonial = null;
 if (isset($_GET['edit'])) {
     $id = (int)$_GET['edit'];
@@ -65,6 +61,8 @@ if (isset($_GET['edit'])) {
 }
 
 $testimonials = $db->query("SELECT * FROM testimonials ORDER BY created_at DESC")->fetchAll();
+include __DIR__ . '/../includes/header.php';
+$isAdminPage = true;
 ?>
 <style>
     .admin-layout {
@@ -109,6 +107,13 @@ $testimonials = $db->query("SELECT * FROM testimonials ORDER BY created_at DESC"
         padding: 2rem;
         background: #FAF8F2;
         min-height: 100vh;
+    }
+
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
     }
 
     .admin-header h1 {
@@ -166,25 +171,26 @@ $testimonials = $db->query("SELECT * FROM testimonials ORDER BY created_at DESC"
     }
 </style>
 
-<?php include __DIR__ . '/../includes/header.php'; ?>
-
 <div class="admin-layout">
     <div class="admin-sidebar">
         <h3>Admin Panel</h3>
-        <a href="<?php echo SITE_URL; ?>/admin/dashboard.php">&#9632; Dashboard</a>
-        <a href="<?php echo SITE_URL; ?>/admin/appointments.php">&#9997; Appointments</a>
-        <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php">&#128218; Articles</a>
-        <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">&#128197; Events</a>
-        <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php" class="active">&#9733; Testimonials</a>
+        <a href="<?php echo SITE_URL; ?>/admin/dashboard.php">Dashboard</a>
+        <a href="<?php echo SITE_URL; ?>/admin/appointments.php">Appointments</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_services.php">Services</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php">Articles</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">Events</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php" class="active">Testimonials</a>
         <hr style="border-color:rgba(255,255,255,0.1);margin:1.5rem 0;">
-        <a href="<?php echo SITE_URL; ?>/index.php">&#8592; View Site</a>
-        <a href="<?php echo SITE_URL; ?>/admin/logout.php">&#128682; Logout</a>
+        <a href="<?php echo SITE_URL; ?>/index.php">View Site</a>
+        <a href="<?php echo SITE_URL; ?>/admin/logout.php">Logout</a>
     </div>
 
     <div class="admin-content">
         <div class="admin-header">
             <h1><?php echo $editTestimonial ? 'Edit Testimonial' : 'Manage Testimonials'; ?></h1>
-            <a href="?new=1" class="btn btn-primary btn-sm">+ New Testimonial</a>
+            <a href="?new=1"
+                style="display:inline-block;padding:0.5rem 1.2rem;background:#4FA08A;color:#fff;border-radius:8px;font-size:0.85rem;text-decoration:none;">+
+                New Testimonial</a>
         </div>
 
         <?php if ($message): ?>
@@ -195,7 +201,6 @@ $testimonials = $db->query("SELECT * FROM testimonials ORDER BY created_at DESC"
             <div class="form-container">
                 <form method="POST" action="">
                     <input type="hidden" name="testimonial_id" value="<?php echo $editTestimonial['id'] ?? 0; ?>">
-
                     <div class="form-row">
                         <div class="form-group">
                             <label for="client_name">Client Name *</label>
@@ -208,37 +213,31 @@ $testimonials = $db->query("SELECT * FROM testimonials ORDER BY created_at DESC"
                                 value="<?php echo h($editTestimonial['client_role'] ?? ''); ?>"
                                 placeholder="e.g., Client, Corporate Partner">
                         </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="rating">Rating</label>
-                        <select id="rating" name="rating" class="form-control">
-                            <?php for ($i = 5; $i >= 1; $i--): ?>
-                                <option value="<?php echo $i; ?>"
-                                    <?php echo ($editTestimonial && $editTestimonial['rating'] == $i) ? 'selected' : ''; ?>>
-                                    <?php echo $i; ?> Stars</option>
-                            <?php endfor; ?>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="content">Testimonial Content *</label>
-                        <textarea id="content" name="content" class="form-control" rows="4"
-                            required><?php echo h($editTestimonial['content'] ?? ''); ?></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="is_approved" value="1"
-                                <?php echo ($editTestimonial && $editTestimonial['is_approved']) ? 'checked' : ''; ?>>
-                            Approved (visible on website)
-                        </label>
-                    </div>
-
-                    <div style="display:flex;gap:1rem;">
-                        <button type="submit" name="save_testimonial" class="btn btn-primary">Save Testimonial</button>
-                        <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php" class="btn btn-secondary">Cancel</a>
-                    </div>
+                        <div class="form-group">
+                            <label for="rating">Rating</label>
+                            <select id="rating" name="rating" class="form-control">
+                                <?php for ($i = 5; $i >= 1; $i--): ?>
+                                    <option value="<?php echo $i; ?>"
+                                        <?php echo ($editTestimonial && $editTestimonial['rating'] == $i) ? 'selected' : ''; ?>>
+                                        <?php echo $i; ?> Stars</option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="content">Testimonial Content *</label>
+                            <textarea id="content" name="content" class="form-control" rows="4"
+                                required><?php echo h($editTestimonial['content'] ?? ''); ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label><input type="checkbox" name="is_approved" value="1"
+                                    <?php echo ($editTestimonial && $editTestimonial['is_approved']) ? 'checked' : ''; ?>>
+                                Approved (visible on website)</label>
+                        </div>
+                        <div style="display:flex;gap:1rem;">
+                            <button type="submit" name="save_testimonial" class="btn btn-primary">Save Testimonial</button>
+                            <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php"
+                                class="btn btn-secondary">Cancel</a>
+                        </div>
                 </form>
             </div>
         <?php endif; ?>
@@ -260,28 +259,21 @@ $testimonials = $db->query("SELECT * FROM testimonials ORDER BY created_at DESC"
                     <tbody>
                         <?php foreach ($testimonials as $testimonial): ?>
                             <tr>
-                                <td><strong><?php echo h($testimonial['client_name']); ?></strong>
-                                    <?php if ($testimonial['client_role']): ?><br><small><?php echo h($testimonial['client_role']); ?></small><?php endif; ?>
+                                <td><strong><?php echo h($testimonial['client_name']); ?></strong><?php if ($testimonial['client_role']): ?><br><small><?php echo h($testimonial['client_role']); ?></small><?php endif; ?>
                                 </td>
-                                <td>
-                                    <?php for ($i = 0; $i < $testimonial['rating']; $i++): ?>
-                                        <span style="color:#E4CF55;">&#9733;</span>
-                                    <?php endfor; ?>
-                                </td>
+                                <td><?php for ($i = 0; $i < $testimonial['rating']; $i++): ?><span
+                                            style="color:#E4CF55;">&#9733;</span><?php endfor; ?></td>
                                 <td><small><?php echo h(truncateText($testimonial['content'], 80)); ?></small></td>
-                                <td>
-                                    <?php echo $testimonial['is_approved'] ? '<span style="color:#4FA08A;">Approved</span>' : '<span style="color:#999;">Pending</span>'; ?>
+                                <td><?php echo $testimonial['is_approved'] ? '<span style="color:#4FA08A;">Approved</span>' : '<span style="color:#999;">Pending</span>'; ?>
                                 </td>
                                 <td><small><?php echo formatDate($testimonial['created_at']); ?></small></td>
                                 <td>
-                                    <a href="?toggle=<?php echo $testimonial['id']; ?>" class="btn btn-sm btn-approve"
-                                        style="padding:0.3rem 0.8rem;font-size:0.8rem;">
-                                        <?php echo $testimonial['is_approved'] ? 'Unapprove' : 'Approve'; ?>
-                                    </a>
-                                    <a href="?edit=<?php echo $testimonial['id']; ?>" class="btn btn-sm btn-primary"
-                                        style="padding:0.3rem 0.8rem;font-size:0.8rem;">Edit</a>
-                                    <a href="?delete=<?php echo $testimonial['id']; ?>" class="btn btn-sm btn-danger"
-                                        style="padding:0.3rem 0.8rem;font-size:0.8rem;"
+                                    <a href="?toggle=<?php echo $testimonial['id']; ?>"
+                                        style="display:inline-block;padding:0.3rem 0.8rem;background:#4FA08A;color:#fff;border-radius:5px;font-size:0.8rem;text-decoration:none;"><?php echo $testimonial['is_approved'] ? 'Unapprove' : 'Approve'; ?></a>
+                                    <a href="?edit=<?php echo $testimonial['id']; ?>"
+                                        style="display:inline-block;padding:0.3rem 0.8rem;background:#3F5195;color:#fff;border-radius:5px;font-size:0.8rem;text-decoration:none;">Edit</a>
+                                    <a href="?delete=<?php echo $testimonial['id']; ?>"
+                                        style="display:inline-block;padding:0.3rem 0.8rem;background:#dc3545;color:#fff;border-radius:5px;font-size:0.8rem;text-decoration:none;"
                                         onclick="return confirm('Delete this testimonial?')">Delete</a>
                                 </td>
                             </tr>
@@ -289,11 +281,9 @@ $testimonials = $db->query("SELECT * FROM testimonials ORDER BY created_at DESC"
                     </tbody>
                 </table>
             <?php else: ?>
-                <p style="color:#999;text-align:center;padding:2rem;">No testimonials yet. Click "+ New Testimonial" to add
-                    one.</p>
+                <p style="color:#999;text-align:center;padding:2rem;">No testimonials yet.</p>
             <?php endif; ?>
         </div>
     </div>
-</div>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+    <?php include __DIR__ . '/../includes/footer.php'; ?>

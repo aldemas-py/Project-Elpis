@@ -9,14 +9,12 @@ requireAdmin();
 
 $stats = getDashboardStats();
 
-// Get recent appointments
 $db = getDB();
 $recentAppointments = $db->query("SELECT * FROM appointments ORDER BY created_at DESC LIMIT 5")->fetchAll();
 
 include __DIR__ . '/../includes/header.php';
 $isAdminPage = true;
 ?>
-
 <style>
     .admin-layout {
         display: grid;
@@ -165,84 +163,76 @@ $isAdminPage = true;
 <div class="admin-layout">
     <div class="admin-sidebar">
         <h3>Admin Panel</h3>
-        <a href="<?php echo SITE_URL; ?>/admin/dashboard.php" class="active">&#9632; Dashboard</a>
-        <a href="<?php echo SITE_URL; ?>/admin/appointments.php">&#9997; Appointments</a>
-        <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php">&#128218; Articles</a>
-        <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">&#128197; Events</a>
-        <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php">&#9733; Testimonials</a>
+        <a href="<?php echo SITE_URL; ?>/admin/dashboard.php" class="active">Dashboard</a>
+        <a href="<?php echo SITE_URL; ?>/admin/appointments.php">Appointments</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_services.php">Services</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php">Articles</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">Events</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php">Testimonials</a>
         <hr style="border-color:rgba(255,255,255,0.1);margin:1.5rem 0;">
-        <a href="<?php echo SITE_URL; ?>/index.php">&#8592; View Site</a>
-        <a href="<?php echo SITE_URL; ?>/admin/logout.php">&#128682; Logout</a>
+        <a href="<?php echo SITE_URL; ?>/index.php">View Site</a>
+        <a href="<?php echo SITE_URL; ?>/admin/logout.php">Logout</a>
     </div>
-
     <div class="admin-content">
         <div class="admin-header">
             <h1>Dashboard</h1>
             <span style="color:#999;font-size:0.9rem;">Welcome, <?php echo h($_SESSION['admin_username']); ?></span>
         </div>
-
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">&#9733;</div>
                 <div class="stat-value"><?php echo $stats['total_services']; ?></div>
                 <div class="stat-label">Active Services</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">&#128218;</div>
-                <div class="stat-value"><?php echo $stats['total_articles']; ?></div>
-                <div class="stat-label">Published Articles</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">&#128197;</div>
-                <div class="stat-value"><?php echo $stats['total_events']; ?></div>
-                <div class="stat-label">Upcoming Events</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">&#9888;</div>
-                <div class="stat-value"><?php echo $stats['pending_appointments']; ?></div>
-                <div class="stat-label">Pending Appointments</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">&#9733;</div>
-                <div class="stat-value"><?php echo $stats['total_testimonials']; ?></div>
-                <div class="stat-label">Approved Testimonials</div>
-            </div>
-        </div>
+                <div class="stat-card">
+                    <div class="stat-icon">&#128218;</div>
+                    <div class="stat-value"><?php echo $stats['total_articles']; ?></div>
+                    <div class="stat-label">Published Articles</div>
+                    <div class="stat-card">
+                        <div class="stat-icon">&#128197;</div>
+                        <div class="stat-value"><?php echo $stats['total_events']; ?></div>
+                        <div class="stat-label">Upcoming Events</div>
+                        <div class="stat-card">
+                            <div class="stat-icon">&#9888;</div>
+                            <div class="stat-value"><?php echo $stats['pending_appointments']; ?></div>
+                            <div class="stat-label">Pending Appointments</div>
+                            <div class="stat-card">
+                                <div class="stat-icon">&#9733;</div>
+                                <div class="stat-value"><?php echo $stats['total_testimonials']; ?></div>
+                                <div class="stat-label">Approved Testimonials</div>
+                            </div>
+                            <div class="table-container">
+                                <h3>Recent Appointments</h3>
+                                <?php if (count($recentAppointments) > 0): ?>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Phone</th>
+                                                <th>Service</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($recentAppointments as $appt): ?>
+                                                <tr>
+                                                    <td><strong><?php echo h($appt['name']); ?></strong></td>
+                                                    <td><?php echo h($appt['email']); ?></td>
+                                                    <td><?php echo h($appt['phone']); ?></td>
+                                                    <td><?php echo h($appt['service'] ?: 'General'); ?></td>
+                                                    <td><?php echo formatDate($appt['created_at']); ?></td>
+                                                    <td><span
+                                                            class="status-badge status-<?php echo $appt['status']; ?>"><?php echo ucfirst($appt['status']); ?></span>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                <?php else: ?>
+                                    <p style="color:#999;text-align:center;padding:2rem;">No appointments yet.</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
 
-        <div class="table-container">
-            <h3>Recent Appointments</h3>
-            <?php if (count($recentAppointments) > 0): ?>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Service</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($recentAppointments as $appt): ?>
-                            <tr>
-                                <td><strong><?php echo h($appt['name']); ?></strong></td>
-                                <td><?php echo h($appt['email']); ?></td>
-                                <td><?php echo h($appt['phone']); ?></td>
-                                <td><?php echo h($appt['service'] ?: 'General'); ?></td>
-                                <td><?php echo formatDate($appt['created_at']); ?></td>
-                                <td><span
-                                        class="status-badge status-<?php echo $appt['status']; ?>"><?php echo ucfirst($appt['status']); ?></span>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php else: ?>
-                <p style="color:#999;text-align:center;padding:2rem;">No appointments yet.</p>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
-
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+                        <?php include __DIR__ . '/../includes/footer.php'; ?>
