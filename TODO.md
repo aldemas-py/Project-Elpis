@@ -54,5 +54,12 @@
 - **URL**: `http://127.0.0.1/work_folder/Project-Elpis/admin/`
 - **Username**: `admin`
 - **Password**: `admin123`
+
+## 🔍 Post-Completion Audit (Fixed Issues)
+| # | Issue | Severity | Fix Applied |
+|---|-------|----------|-------------|
+| 1 | **Wrong admin password hash in SQL files** — `$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi` verified against `"password"`, NOT `"admin123"`. Anyone importing the SQL would be locked out. | **CRITICAL** | Replaced with correct bcrypt hash of `admin123`: `$2y$10$3q89xjFLiu.SpW4lfT5IbOkXsWYNfrEbZY29f1KbCQCZTGNWfb2LS` in both `sql/database.sql` and `sql/seed_admin.sql` |
+| 2 | **`manage_services.php` checkbox always checked** — `<?php echo ($editService && $editService['is_active']) ? 'checked' : 'checked'; ?>` outputs `checked` for both true AND false. Impossible to uncheck "Active" when editing a service. | **MEDIUM** | Changed to `: '';` so unchecked boxes render unchecked |
+| 3 | **`uploadImage()` PHP 8 warning** — when no file is uploaded, `$_FILES['image'] ?? []` = `[]`, and `$file['error']` triggers `Undefined array key` warning in PHP 8. | **LOW** | Added `empty($file) || !isset($file['error'])` guard before accessing `$file['error']` |
 </content>
 

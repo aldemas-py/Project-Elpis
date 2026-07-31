@@ -239,7 +239,7 @@ function uploadImage($file, $existingFile = null)
         mkdir($uploadDir, 0755, true);
     }
 
-    if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
+    if (empty($file) || !isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
         return $existingFile;
     }
 

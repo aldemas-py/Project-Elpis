@@ -232,7 +232,7 @@ table td {
                     <div class="form-group">
                         <label>
                             <input type="checkbox" name="is_active" value="1"
-                                <?php echo ($editService && $editService['is_active']) ? 'checked' : 'checked'; ?>>
+                                <?php echo ($editService && $editService['is_active']) ? 'checked' : ''; ?>>
                             Active (visible on website)
                         </label>
                     </div>

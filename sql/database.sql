@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS admin_users (
 INSERT INTO admin_users (username, password_hash)
 VALUES (
         'admin',
-        '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
+        '$2y$10$3q89xjFLiu.SpW4lfT5IbOkXsWYNfrEbZY29f1KbCQCZTGNWfb2LS'
     );
 -- ------------------------------------------------------------
 -- Services
