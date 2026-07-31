@@ -33,9 +33,16 @@ define('MPESA_SHORTCODE', '174379'); // Sandbox shortcode
 define('MPESA_ENVIRONMENT', 'sandbox'); // 'sandbox' or 'production'
 
 // Session configuration
-ini_set('session.cookie_httponly', 1);
-ini_set('session.use_only_cookies', 1);
-ini_set('session.cookie_secure', 0); // Set to 1 in production with HTTPS
+define('SESSION_TIMEOUT', 300); // Admin auto-logout after 5 minutes of inactivity (seconds)
+
+// Session hardening settings (must be set before session_start)
+ini_set('session.cookie_httponly', 1);          // Prevent JavaScript access to session cookie
+ini_set('session.use_only_cookies', 1);          // Only allow cookie-based sessions
+ini_set('session.cookie_secure', 0);             // Set to 1 in production with HTTPS
+ini_set('session.cookie_lifetime', 0);           // 0 = session cookie: expires when browser closes
+ini_set('session.use_strict_mode', 1);           // Reject uninitialized session IDs (anti-fixation)
+ini_set('session.cookie_samesite', 'Strict');    // Mitigate CSRF
+ini_set('session.gc_maxlifetime', 1800);         // Server-side garbage collection (30 min)
 
 /**
  * Get PDO database connection
@@ -64,6 +71,14 @@ function getDB()
 function startSession()
 {
     if (session_status() === PHP_SESSION_NONE) {
+        // Ensure session cookie parameters are applied
+        session_set_cookie_params([
+            'lifetime' => 0,                          // Expires when browser closes
+            'path' => '/',
+            'httponly' => true,                       // Not accessible via JS
+            'secure' => false,                        // Set to true in production with HTTPS
+            'samesite' => 'Strict'                    // CSRF protection
+        ]);
         session_start();
     }
 }

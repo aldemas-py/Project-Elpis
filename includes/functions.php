@@ -31,7 +31,24 @@ function createSlug($string)
 function isAdminLoggedIn()
 {
     startSession();
-    return isset($_SESSION['admin_id']);
+
+    if (!isset($_SESSION['admin_id'])) {
+        return false;
+    }
+
+    // Check for session timeout (5 minutes of inactivity)
+    if (isset($_SESSION['last_activity'])) {
+        $inactive = time() - $_SESSION['last_activity'];
+        if ($inactive > SESSION_TIMEOUT) {
+            adminLogout('Session expired due to inactivity. Please log in again.');
+            return false;
+        }
+    }
+
+    // Update last activity timestamp
+    $_SESSION['last_activity'] = time();
+
+    return true;
 }
 
 /**
@@ -40,9 +57,46 @@ function isAdminLoggedIn()
 function requireAdmin()
 {
     if (!isAdminLoggedIn()) {
-        header('Location: ' . SITE_URL . '/admin/index.php');
+        header('Location: ' . SITE_URL . '/admin/index.php?expired=1');
         exit;
     }
+}
+
+/**
+ * Complete admin logout - destroys session securely
+ */
+function adminLogout($redirectMessage = '')
+{
+    startSession();
+
+    // Clear all session variables
+    $_SESSION = [];
+
+    // Delete the session cookie from browser
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params['path'],
+            $params['domain'],
+            $params['secure'],
+            $params['httponly']
+        );
+    }
+
+    // Destroy the server-side session
+    session_destroy();
+
+    if ($redirectMessage) {
+        // Start a fresh session just to carry the redirect message
+        session_start();
+        $_SESSION['logout_message'] = $redirectMessage;
+        session_write_close();
+    }
+
+    return true;
 }
 
 /**

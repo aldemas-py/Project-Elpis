@@ -1,0 +1,21 @@
+# ============================================================
+# Security: Protect uploaded files directory
+# ============================================================
+
+# Disable directory listing
+Options -Indexes
+
+# Block PHP execution in uploads folder
+<FilesMatch "\.(php|php5|php7|phtml|phar)$">
+    Require all denied
+</FilesMatch>
+
+# Disable server-side script execution for uploaded content
+RemoveHandler .php .php5 .php7 .phtml .phar
+RemoveType .php .php5 .php7 .phtml .phar
+
+# Prevent access to hidden files
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+

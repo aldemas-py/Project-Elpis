@@ -84,116 +84,116 @@ while ($row = $bStmt->fetch()) {
     $bookingCounts[$row['event_id']] = $row['cnt'];
 }
 ?>
+<?php include __DIR__ . '/../includes/header.php';
+$isAdminPage = true; ?>
 <style>
-    .admin-layout {
-        display: grid;
-        grid-template-columns: 250px 1fr;
-        min-height: 100vh;
-        padding-top: 70px;
-    }
+.admin-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    min-height: 100vh;
+    padding-top: 70px;
+}
 
-    .admin-sidebar {
-        background: #263447;
-        padding: 2rem 1rem;
-        color: #fff;
-    }
+.admin-sidebar {
+    background: #263447;
+    padding: 2rem 1rem;
+    color: #fff;
+}
 
-    .admin-sidebar h3 {
-        color: #fff;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 1.5rem;
-        padding: 0 1rem;
-    }
+.admin-sidebar h3 {
+    color: #fff;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1.5rem;
+    padding: 0 1rem;
+}
 
-    .admin-sidebar a {
-        display: block;
-        padding: 0.8rem 1rem;
-        color: rgba(255, 255, 255, 0.7);
-        border-radius: 8px;
-        margin-bottom: 0.3rem;
-        font-size: 0.9rem;
-        transition: all 0.3s ease;
-    }
+.admin-sidebar a {
+    display: block;
+    padding: 0.8rem 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
 
-    .admin-sidebar a:hover,
-    .admin-sidebar a.active {
-        background: rgba(255, 255, 255, 0.1);
-        color: #E4CF55;
-    }
+.admin-sidebar a:hover,
+.admin-sidebar a.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: #E4CF55;
+}
 
-    .admin-content {
-        padding: 2rem;
-        background: #FAF8F2;
-        min-height: 100vh;
-    }
+.admin-content {
+    padding: 2rem;
+    background: #FAF8F2;
+    min-height: 100vh;
+}
 
-    .admin-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-    }
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
 
-    .admin-header h1 {
-        font-size: 1.5rem;
-    }
+.admin-header h1 {
+    font-size: 1.5rem;
+}
 
-    .form-container {
-        background: #fff;
-        border-radius: 12px;
-        padding: 2rem;
-        border: 1px solid #D7DDD9;
-        margin-bottom: 2rem;
-    }
+.form-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    border: 1px solid #D7DDD9;
+    margin-bottom: 2rem;
+}
 
-    .table-container {
-        background: #fff;
-        border-radius: 12px;
-        padding: 1.5rem;
-        border: 1px solid #D7DDD9;
-        overflow-x: auto;
-    }
+.table-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #D7DDD9;
+    overflow-x: auto;
+}
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.9rem;
-    }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
 
-    table th {
-        text-align: left;
-        padding: 0.8rem;
-        border-bottom: 2px solid #D7DDD9;
-        color: #3F5195;
-        font-weight: 600;
-    }
+table th {
+    text-align: left;
+    padding: 0.8rem;
+    border-bottom: 2px solid #D7DDD9;
+    color: #3F5195;
+    font-weight: 600;
+}
 
-    table td {
-        padding: 0.8rem;
-        border-bottom: 1px solid #EAF4F1;
-        color: #555;
-    }
+table td {
+    padding: 0.8rem;
+    border-bottom: 1px solid #EAF4F1;
+    color: #555;
+}
 
-    .btn-danger {
-        background: #dc3545;
-        color: #fff;
-    }
+.btn-danger {
+    background: #dc3545;
+    color: #fff;
+}
 
-    .btn-danger:hover {
-        background: #c82333;
-    }
+.btn-danger:hover {
+    background: #c82333;
+}
 
-    .preview-img {
-        width: 60px;
-        height: 40px;
-        object-fit: cover;
-        border-radius: 4px;
-    }
+.preview-img {
+    width: 60px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}
 </style>
-
-<?php include __DIR__ . '/../includes/header.php'; ?>
 
 <div class="admin-layout">
     <div class="admin-sidebar">
@@ -216,143 +216,144 @@ while ($row = $bStmt->fetch()) {
         </div>
 
         <?php if ($message): ?>
-            <div class="alert alert-<?php echo $messageType; ?>"><?php echo h($message); ?></div>
+        <div class="alert alert-<?php echo $messageType; ?>"><?php echo h($message); ?></div>
         <?php endif; ?>
 
         <?php if ($editEvent || isset($_GET['new'])): ?>
-            <div class="form-container">
-                <form method="POST" action="" enctype="multipart/form-data">
-                    <input type="hidden" name="event_id" value="<?php echo $editEvent['id'] ?? 0; ?>">
+        <div class="form-container">
+            <form method="POST" action="" enctype="multipart/form-data">
+                <input type="hidden" name="event_id" value="<?php echo $editEvent['id'] ?? 0; ?>">
 
+                <div class="form-group">
+                    <label for="title">Event Title *</label>
+                    <input type="text" id="title" name="title" class="form-control" required
+                        value="<?php echo h($editEvent['title'] ?? ''); ?>">
+                </div>
+
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="title">Event Title *</label>
-                        <input type="text" id="title" name="title" class="form-control" required
-                            value="<?php echo h($editEvent['title'] ?? ''); ?>">
+                        <label for="event_date">Date *</label>
+                        <input type="date" id="event_date" name="event_date" class="form-control" required
+                            value="<?php echo $editEvent['event_date'] ?? ''; ?>">
+                    </div>
+                    <div class="form-group">
+                        <label for="event_time">Time</label>
+                        <input type="text" id="event_time" name="event_time" class="form-control"
+                            value="<?php echo h($editEvent['event_time'] ?? ''); ?>"
+                            placeholder="e.g., 10:00 AM - 12:00 PM">
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="event_date">Date *</label>
-                            <input type="date" id="event_date" name="event_date" class="form-control" required
-                                value="<?php echo $editEvent['event_date'] ?? ''; ?>">
+                            <label for="venue">Venue</label>
+                            <input type="text" id="venue" name="venue" class="form-control"
+                                value="<?php echo h($editEvent['venue'] ?? ''); ?>">
                         </div>
                         <div class="form-group">
-                            <label for="event_time">Time</label>
-                            <input type="text" id="event_time" name="event_time" class="form-control"
-                                value="<?php echo h($editEvent['event_time'] ?? ''); ?>"
-                                placeholder="e.g., 10:00 AM - 12:00 PM">
+                            <label for="price">Price (KES)</label>
+                            <input type="number" id="price" name="price" class="form-control" step="0.01"
+                                value="<?php echo $editEvent['price'] ?? 0; ?>">
+                            <small style="color:#999;">Set to 0 for free events</small>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="venue">Venue</label>
-                                <input type="text" id="venue" name="venue" class="form-control"
-                                    value="<?php echo h($editEvent['venue'] ?? ''); ?>">
+                        <div class="form-group">
+                            <label for="image">Event Image</label>
+                            <input type="file" id="image" name="image" class="form-control" accept="image/*">
+                            <?php if ($editEvent && $editEvent['image']): ?>
+                            <div style="margin-top:0.5rem;">
+                                <img src="<?php echo SITE_URL; ?>/uploads/<?php echo h($editEvent['image']); ?>"
+                                    class="preview-img" alt="Current image">
+                                <small style="color:#999;"> Current image. Upload new to replace.</small>
                             </div>
-                            <div class="form-group">
-                                <label for="price">Price (KES)</label>
-                                <input type="number" id="price" name="price" class="form-control" step="0.01"
-                                    value="<?php echo $editEvent['price'] ?? 0; ?>">
-                                <small style="color:#999;">Set to 0 for free events</small>
-                            </div>
+                            <?php endif; ?>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="image">Event Image</label>
-                                <input type="file" id="image" name="image" class="form-control" accept="image/*">
-                                <?php if ($editEvent && $editEvent['image']): ?>
-                                    <div style="margin-top:0.5rem;">
-                                        <img src="<?php echo SITE_URL; ?>/uploads/<?php echo h($editEvent['image']); ?>"
-                                            class="preview-img" alt="Current image">
-                                        <small style="color:#999;"> Current image. Upload new to replace.</small>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
+                        <div class="form-group">
+                            <label for="max_participants">Max Participants</label>
+                            <input type="number" id="max_participants" name="max_participants" class="form-control"
+                                value="<?php echo $editEvent['max_participants'] ?? ''; ?>"
+                                placeholder="Leave empty for unlimited">
+                        </div>
 
-                            <div class="form-group">
-                                <label for="max_participants">Max Participants</label>
-                                <input type="number" id="max_participants" name="max_participants" class="form-control"
-                                    value="<?php echo $editEvent['max_participants'] ?? ''; ?>"
-                                    placeholder="Leave empty for unlimited">
-                            </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" name="description" class="form-control"
+                                rows="5"><?php echo h($editEvent['description'] ?? ''); ?></textarea>
+                        </div>
 
-                            <div class="form-group">
-                                <label for="description">Description</label>
-                                <textarea id="description" name="description" class="form-control"
-                                    rows="5"><?php echo h($editEvent['description'] ?? ''); ?></textarea>
-                            </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" name="is_published" value="1"
+                                    <?php echo ($editEvent && $editEvent['is_published']) ? 'checked' : ''; ?>>
+                                Publish (visible on website)
+                            </label>
+                        </div>
 
-                            <div class="form-group">
-                                <label>
-                                    <input type="checkbox" name="is_published" value="1"
-                                        <?php echo ($editEvent && $editEvent['is_published']) ? 'checked' : ''; ?>>
-                                    Publish (visible on website)
-                                </label>
-                            </div>
-
-                            <div style="display:flex;gap:1rem;">
-                                <button type="submit" name="save_event" class="btn btn-primary">Save Event</button>
-                                <a href="<?php echo SITE_URL; ?>/admin/manage_events.php"
-                                    class="btn btn-secondary">Cancel</a>
-                            </div>
-                </form>
-            </div>
+                        <div style="display:flex;gap:1rem;">
+                            <button type="submit" name="save_event" class="btn btn-primary">Save Event</button>
+                            <a href="<?php echo SITE_URL; ?>/admin/manage_events.php"
+                                class="btn btn-secondary">Cancel</a>
+                        </div>
+            </form>
+        </div>
         <?php endif; ?>
 
         <div class="table-container">
             <h3>All Events</h3>
             <?php if (count($events) > 0): ?>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Title</th>
-                            <th>Date</th>
-                            <th>Price</th>
-                            <th>Bookings</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($events as $event): ?>
-                            <?php $past = strtotime($event['event_date']) < time(); ?>
-                            <tr style="<?php echo $past ? 'opacity:0.6;' : ''; ?>">
-                                <td>
-                                    <?php if ($event['image']): ?>
-                                        <img src="<?php echo SITE_URL; ?>/uploads/<?php echo h($event['image']); ?>"
-                                            class="preview-img" alt="">
-                                    <?php else: ?>
-                                        <span style="color:#D7DDD9;">No img</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td><strong><?php echo h($event['title']); ?></strong></td>
-                                <td><?php echo formatDate($event['event_date']); ?></td>
-                                <td><?php echo $event['price'] > 0 ? 'KES ' . number_format($event['price'], 2) : 'Free'; ?>
-                                </td>
-                                <td><?php echo $bookingCounts[$event['id']] ?? 0; ?> bookings</td>
-                                <td>
-                                    <?php if ($past): ?>
-                                        <span style="color:#999;">Past</span>
-                                    <?php else: ?>
-                                        <?php echo $event['is_published'] ? '<span style="color:#4FA08A;">Published</span>' : '<span style="color:#999;">Draft</span>'; ?>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <a href="?edit=<?php echo $event['id']; ?>" class="btn btn-sm btn-primary"
-                                        style="padding:0.3rem 0.8rem;font-size:0.8rem;">Edit</a>
-                                    <a href="?delete=<?php echo $event['id']; ?>" class="btn btn-sm btn-danger"
-                                        style="padding:0.3rem 0.8rem;font-size:0.8rem;"
-                                        onclick="return confirm('Delete this event?')">Delete</a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>Price</th>
+                        <th>Bookings</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($events as $event): ?>
+                    <?php $past = strtotime($event['event_date']) < time(); ?>
+                    <tr style="<?php echo $past ? 'opacity:0.6;' : ''; ?>">
+                        <td>
+                            <?php if ($event['image']): ?>
+                            <img src="<?php echo SITE_URL; ?>/uploads/<?php echo h($event['image']); ?>"
+                                class="preview-img" alt="">
+                            <?php else: ?>
+                            <span style="color:#D7DDD9;">No img</span>
+                            <?php endif; ?>
+                        </td>
+                        <td><strong><?php echo h($event['title']); ?></strong></td>
+                        <td><?php echo formatDate($event['event_date']); ?></td>
+                        <td><?php echo $event['price'] > 0 ? 'KES ' . number_format($event['price'], 2) : 'Free'; ?>
+                        </td>
+                        <td><?php echo $bookingCounts[$event['id']] ?? 0; ?> bookings</td>
+                        <td>
+                            <?php if ($past): ?>
+                            <span style="color:#999;">Past</span>
+                            <?php else: ?>
+                            <?php echo $event['is_published'] ? '<span style="color:#4FA08A;">Published</span>' : '<span style="color:#999;">Draft</span>'; ?>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <a href="?edit=<?php echo $event['id']; ?>" class="btn btn-sm btn-primary"
+                                style="padding:0.3rem 0.8rem;font-size:0.8rem;">Edit</a>
+                            <a href="?delete=<?php echo $event['id']; ?>" class="btn btn-sm btn-danger"
+                                style="padding:0.3rem 0.8rem;font-size:0.8rem;"
+                                onclick="return confirm('Delete this event?')">Delete</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
             <?php else: ?>
-                <p style="color:#999;text-align:center;padding:2rem;">No events created yet. Click "+ New Event" to get
-                    started.</p>
+            <p style="color:#999;text-align:center;padding:2rem;">No events created yet. Click "+ New Event" to get
+                started.</p>
             <?php endif; ?>
         </div>
     </div>
+</div>
 
-    <?php include __DIR__ . '/../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

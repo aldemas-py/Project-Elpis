@@ -80,6 +80,36 @@
 
 <!-- Scripts -->
 <script src="<?php echo SITE_URL; ?>/assets/js/main.js"></script>
+
+<?php if (isset($isAdminPage) && $isAdminPage): ?>
+<!-- Admin Session Auto-Logout: 5 minutes of inactivity -->
+<script>
+(function() {
+    // Session timeout in milliseconds (5 minutes)
+    var SESSION_TIMEOUT = <?php echo defined('SESSION_TIMEOUT') ? SESSION_TIMEOUT * 1000 : 300000; ?>;
+    var logoutUrl = '<?php echo SITE_URL; ?>/admin/logout.php';
+    var idleTimer = null;
+
+    function resetIdleTimer() {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(function() {
+            // Auto-logout after inactivity
+            window.location.href = logoutUrl;
+        }, SESSION_TIMEOUT);
+    }
+
+    // Reset timer on user activity
+    var events = ['click', 'mousemove', 'keydown', 'scroll', 'touchstart', 'mousedown'];
+    for (var i = 0; i < events.length; i++) {
+        document.addEventListener(events[i], resetIdleTimer);
+    }
+
+    // Warn before closing/beforeunload is NOT used (session cookie dies on browser close automatically)
+    // Start the idle timer on page load
+    resetIdleTimer();
+})();
+</script>
+<?php endif; ?>
 </body>
 
 </html>

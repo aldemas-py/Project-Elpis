@@ -154,6 +154,32 @@ h6 {
     font-size: 0.85rem;
 }
 
+.btn-danger {
+    background: #dc3545;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.btn-approve {
+    background: #4FA08A;
+    color: #fff;
+}
+
+.btn-approve:hover {
+    background: #3F5195;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.btn-block {
+    width: 100%;
+}
+
 /* ----- Navigation ----- */
 .navbar {
     position: fixed;
@@ -243,6 +269,18 @@ h6 {
     margin: 5px 0;
     transition: all 0.3s ease;
     border-radius: 2px;
+}
+
+.nav-toggle span.active:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.nav-toggle span.active:nth-child(2) {
+    opacity: 0;
+}
+
+.nav-toggle span.active:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
 }
 
 /* ----- Hero Section ----- */
@@ -359,6 +397,10 @@ h6 {
     color: #666;
     font-size: 1.05rem;
     margin-top: 0.8rem;
+}
+
+.section-header .section-subtitle {
+    color: #4FA08A;
 }
 
 /* ----- Services Grid ----- */
@@ -562,16 +604,16 @@ h6 {
 
 /* ----- Testimonials ----- */
 .testimonials-section {
-    background: linear-gradient(135deg, #3F5195, #2a3a6e);
-    color: #fff;
+    background: #EAF4F1;
+    color: #263447;
 }
 
 .testimonials-section .section-header h2 {
-    color: #fff;
+    color: #3F5195;
 }
 
 .testimonials-section .section-header p {
-    color: rgba(255, 255, 255, 0.7);
+    color: #666;
 }
 
 .testimonials-grid {
@@ -581,16 +623,18 @@ h6 {
 }
 
 .testimonial-card {
-    background: rgba(255, 255, 255, 0.1);
+    background: #fff;
     border-radius: 15px;
     padding: 2rem;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    transition: transform 0.3s ease;
+    border: 1px solid #D7DDD9;
+    box-shadow: 0 5px 25px rgba(63, 81, 149, 0.06);
+    transition: all 0.3s ease;
 }
 
 .testimonial-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 10px 35px rgba(63, 81, 149, 0.12);
+    border-color: #4FA08A;
 }
 
 .testimonial-stars {
@@ -601,7 +645,7 @@ h6 {
 
 .testimonial-content {
     font-style: italic;
-    color: rgba(255, 255, 255, 0.85);
+    color: #555;
     font-size: 0.95rem;
     line-height: 1.7;
     margin-bottom: 1.2rem;
@@ -627,12 +671,12 @@ h6 {
 }
 
 .testimonial-author h4 {
-    color: #fff;
+    color: #3F5195;
     font-size: 1rem;
 }
 
 .testimonial-author span {
-    color: rgba(255, 255, 255, 0.6);
+    color: #999;
     font-size: 0.85rem;
 }
 
@@ -690,6 +734,35 @@ select.form-control {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
+}
+
+/* ----- Split Layouts (Booking/Contact/About) ----- */
+.split-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.split-layout-about {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.split-contact-layout {
+    display: grid;
+    grid-template-columns: 1fr 1px 1.5fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.vertical-divider {
+    background: #D7DDD9;
+    height: 100%;
+    min-height: 400px;
+    width: 1px;
+    display: block;
 }
 
 /* ----- Map Section ----- */
@@ -1170,6 +1243,24 @@ select.form-control {
 
     .info-card-icon {
         margin: 0 auto 1rem;
+    }
+
+    .split-layout,
+    .split-contact-layout,
+    .split-layout-about {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .vertical-divider {
+        display: none;
+    }
+
+    .mobile-divider {
+        display: block;
+        border: none;
+        border-top: 1px solid #D7DDD9;
+        margin: 2rem 0;
     }
 }
 

@@ -15,6 +15,15 @@ if (isset($_SESSION['admin_id'])) {
 }
 
 $error = '';
+$notice = '';
+
+// Show session-expired message (from auto-logout / inactivity)
+if (isset($_GET['expired']) && $_GET['expired'] == 1) {
+    $notice = 'Your session has expired due to inactivity. Please log in again.';
+} elseif (isset($_SESSION['logout_message'])) {
+    $notice = $_SESSION['logout_message'];
+    unset($_SESSION['logout_message']);
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
@@ -27,8 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password_hash'])) {
+            // Regenerate session ID to prevent session fixation attacks
+            session_regenerate_id(true);
+
             $_SESSION['admin_id'] = $user['id'];
             $_SESSION['admin_username'] = $user['username'];
+            $_SESSION['last_activity'] = time(); // Track activity for 5-min timeout
+
             header('Location: ' . SITE_URL . '/admin/dashboard.php');
             exit;
         } else {
@@ -47,117 +61,117 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - <?php echo SITE_NAME; ?></title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #3F5195;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #3F5195;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
 
-        .login-container {
-            background: #fff;
-            border-radius: 20px;
-            padding: 3rem;
-            max-width: 420px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-        }
+    .login-container {
+        background: #fff;
+        border-radius: 20px;
+        padding: 3rem;
+        max-width: 420px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
 
-        .login-logo {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+    .login-logo {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
 
-        .login-logo img {
-            height: 60px;
-            margin-bottom: 1rem;
-        }
+    .login-logo img {
+        height: 60px;
+        margin-bottom: 1rem;
+    }
 
-        .login-logo h1 {
-            font-size: 1.3rem;
-            color: #3F5195;
-        }
+    .login-logo h1 {
+        font-size: 1.3rem;
+        color: #3F5195;
+    }
 
-        .login-logo p {
-            color: #999;
-            font-size: 0.85rem;
-        }
+    .login-logo p {
+        color: #999;
+        font-size: 0.85rem;
+    }
 
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
+    .form-group {
+        margin-bottom: 1.2rem;
+    }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 0.4rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #3F5195;
-        }
+    .form-group label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #3F5195;
+    }
 
-        .form-control {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border: 2px solid #D7DDD9;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            transition: border-color 0.3s ease;
-        }
+    .form-control {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 2px solid #D7DDD9;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: border-color 0.3s ease;
+    }
 
-        .form-control:focus {
-            outline: none;
-            border-color: #4FA08A;
-        }
+    .form-control:focus {
+        outline: none;
+        border-color: #4FA08A;
+    }
 
-        .btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: #4FA08A;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
+    .btn {
+        width: 100%;
+        padding: 0.8rem;
+        background: #4FA08A;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
 
-        .btn:hover {
-            background: #3F5195;
-        }
+    .btn:hover {
+        background: #3F5195;
+    }
 
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 0.8rem 1rem;
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-            text-align: center;
-        }
+    .error {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        text-align: center;
+    }
 
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 1.5rem;
-            color: #999;
-            font-size: 0.85rem;
-            text-decoration: none;
-        }
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #999;
+        font-size: 0.85rem;
+        text-decoration: none;
+    }
 
-        .back-link:hover {
-            color: #4FA08A;
-        }
+    .back-link:hover {
+        color: #4FA08A;
+    }
     </style>
 </head>
 
@@ -169,8 +183,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p>Admin Panel Login</p>
         </div>
 
+        <?php if ($notice): ?>
+        <div class="error" style="background:#fff3cd;color:#856404;"><?php echo h($notice); ?></div>
+        <?php endif; ?>
+
         <?php if ($error): ?>
-            <div class="error"><?php echo h($error); ?></div>
+        <div class="error"><?php echo h($error); ?></div>
         <?php endif; ?>
 
         <form method="POST" action="">
