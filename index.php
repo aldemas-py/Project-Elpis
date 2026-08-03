@@ -13,6 +13,7 @@ $events = getUpcomingEvents(3);
 
 include __DIR__ . '/includes/header.php';
 ?>
+this is code
 <!-- ============================================================
      HERO SECTION
      ============================================================ -->
