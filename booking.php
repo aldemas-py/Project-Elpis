@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elpis Counselling Centre - Book a Session (Inquiry Form)
  */
@@ -55,9 +56,9 @@ include __DIR__ . '/includes/header.php';
 
 <section class="section section-white">
     <div class="container">
-        <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:3rem;align-items:start;">
+        <div class="split-duo">
             <!-- Info Side -->
-            <div>
+            <div class="split-info">
                 <p class="section-subtitle">Get Started</p>
                 <h2>Ready to Begin Your Journey?</h2>
                 <p style="margin-top:1rem;color:#555;font-size:1.05rem;line-height:1.8;">
@@ -91,7 +92,7 @@ include __DIR__ . '/includes/header.php';
             </div>
 
             <!-- Form -->
-            <div class="form-section">
+            <div class="split-form form-section">
                 <?php if ($message): ?>
                 <div class="alert alert-<?php echo $messageType; ?>"><?php echo h($message); ?></div>
                 <?php endif; ?>

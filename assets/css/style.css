@@ -765,6 +765,43 @@ select.form-control {
     display: block;
 }
 
+/* ----- Split Layouts with Form-first ordering (mobile) ----- */
+.split-stack {
+    display: grid;
+    grid-template-columns: 1fr 1px 1.5fr;
+    gap: 3rem;
+    align-items: start;
+    grid-template-areas: "info divider form";
+}
+
+.split-stack .split-info {
+    grid-area: info;
+}
+
+.split-stack .split-divider {
+    grid-area: divider;
+}
+
+.split-stack .split-form {
+    grid-area: form;
+}
+
+.split-duo {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 3rem;
+    align-items: start;
+    grid-template-areas: "info form";
+}
+
+.split-duo .split-info {
+    grid-area: info;
+}
+
+.split-duo .split-form {
+    grid-area: form;
+}
+
 /* ----- Map Section ----- */
 .map-container {
     border-radius: 15px;
@@ -1226,11 +1263,17 @@ select.form-control {
     }
 
     .page-banner {
-        padding: 7rem 0 3rem;
+        padding: 7rem 0 3.5rem;
     }
 
     .page-banner h1 {
-        font-size: 2rem;
+        font-size: 2.1rem;
+    }
+
+    .page-banner p {
+        font-size: 1rem;
+        max-width: 90%;
+        margin: 0 auto;
     }
 
     .testimonials-grid {
@@ -1250,6 +1293,20 @@ select.form-control {
     .split-layout-about {
         grid-template-columns: 1fr;
         gap: 2rem;
+    }
+
+    /* Form-first stacking on mobile: form appears above info */
+    .split-stack,
+    .split-duo {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "form"
+            "info";
+        gap: 2rem;
+    }
+
+    .split-stack .split-divider {
+        display: none;
     }
 
     .vertical-divider {

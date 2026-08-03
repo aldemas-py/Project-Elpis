@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elpis Counselling Centre - Contact Us
  */
@@ -50,9 +51,9 @@ include __DIR__ . '/includes/header.php';
 
 <section class="section section-white">
     <div class="container">
-        <div style="display:grid;grid-template-columns:1fr 1px 1.5fr;gap:3rem;align-items:start;">
+        <div class="split-stack">
             <!-- Contact Info -->
-            <div>
+            <div class="split-info">
                 <p class="section-subtitle">Get in Touch</p>
                 <h2>We'd Love to Hear from You</h2>
                 <p style="margin-top:1rem;color:#555;font-size:1.05rem;">
@@ -94,10 +95,10 @@ include __DIR__ . '/includes/header.php';
             </div>
 
             <!-- Vertical Divider -->
-            <div style="background:#D7DDD9;height:100%;min-height:400px;width:1px;display:block;"></div>
+            <div class="split-divider vertical-divider"></div>
 
             <!-- Contact Form -->
-            <div class="form-section">
+            <div class="split-form form-section">
                 <h3 style="margin-bottom:1.5rem;">Send Us a Message</h3>
 
                 <?php if ($message): ?>
@@ -162,22 +163,5 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 </section>
-
-<style>
-@media (max-width: 768px) {
-    section.section-white .container>div[style*="grid-template-columns: 1fr 1px 1.5fr;"] {
-        grid-template-columns: 1fr !important;
-        gap: 2rem !important;
-    }
-
-    .mobile-divider {
-        display: block !important;
-    }
-
-    div[style*="min-height: 400px;"][style*="width: 1px;"] {
-        display: none !important;
-    }
-}
-</style>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
