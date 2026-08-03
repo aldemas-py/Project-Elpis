@@ -1,0 +1,14 @@
+// Database credentials
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'elpis_counselling');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_CHARSET', 'utf8mb4');
+
+
+// Database credentials
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'gmlighti_elpis_counselling');
+define('DB_USER', 'gmlighti_root');
+define('DB_PASS', 'zH5f44TRu@Kkr4C');
+define('DB_CHARSET', 'utf8mb4');

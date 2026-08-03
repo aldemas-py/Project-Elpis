@@ -1,0 +1,24 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/gmlighti/public_html/
+    - /bin/cp index.php $DEPLOYPATH
+    - /bin/cp about.php $DEPLOYPATH
+    - /bin/cp article.php $DEPLOYPATH
+    - /bin/cp articles.php $DEPLOYPATH
+    - /bin/cp contact.php $DEPLOYPATH
+    - /bin/cp event.php $DEPLOYPATH
+    - /bin/cp booking.php $DEPLOYPATH
+    - /bin/cp services.php $DEPLOYPATH
+
+    - /bin/rm -rf $DEPLOYPATH/images
+    - /bin/rm -rf $DEPLOYPATH/includes
+    - /bin/rm -rf $DEPLOYPATH/admin
+    - /bin/rm -rf $DEPLOYPATH/assets
+    - /bin/rm -rf $DEPLOYPATH/uploads
+
+    - /bin/cp -R images $DEPLOYPATH
+    - /bin/cp -R includes $DEPLOYPATH
+    - /bin/cp -R admin $DEPLOYPATH
+    - /bin/cp -R assets $DEPLOYPATH
+    - /bin/cp -R uploads $DEPLOYPATH
