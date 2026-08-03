@@ -6,9 +6,9 @@
 
 // Database credentials
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'gmlighti_elpis_counselling');
-define('DB_USER', 'gmlighti_root');
-define('DB_PASS', 'zH5f44TRu@Kkr4C');
+define('DB_NAME', 'njengas2_elpis_counselling');
+define('DB_USER', 'njengas2_njenga');
+define('DB_PASS', '4t]3oyUN;Y52lE');
 define('DB_CHARSET', 'utf8mb4');
 
 // Site configuration
