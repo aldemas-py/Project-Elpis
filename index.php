@@ -97,7 +97,7 @@ include __DIR__ . '/includes/header.php';
 <section class="section testimonials-section">
     <div class="container">
         <div class="section-header">
-            <p class="section-subtitle" style="color:#E4CF55;">Testimonials</p>
+            <p class="section-subtitle" style="color:#E76F51;">Testimonials</p>
             <h2>What Our Clients Say</h2>
             <p>Hear from those who have walked this journey with us.</p>
         </div>

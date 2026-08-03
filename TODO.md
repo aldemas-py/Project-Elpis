@@ -1,61 +1,27 @@
-# Project-Elpis Implementation Checklist
+# Restyling with Complementary Contrast Colors
 
-## Phase 1: Foundation
-- [x] Create TODO.md (this file)
-- [x] Create SQL database schema (`sql/database.sql`)
-- [x] Create database config (`includes/config.php`)
-- [x] Create helper functions (`includes/functions.php`)
+**Goal:** Keep each project's primary colors and add complementary contrasting accent colors (color theory) to improve visual feel.
 
-## Phase 2: Design System
-- [x] Create responsive CSS (`assets/css/style.css`)
-- [x] Create JavaScript (`assets/js/main.js`)
+## Color Theory Strategy
+- **Complementary colors** sit opposite each other on the color wheel → maximum contrast & visual energy.
+- **60-30-10 rule**: dominant primary + secondary neutral + accent (the complement).
 
-## Phase 3: Site Shell
-- [x] Create header template (`includes/header.php`)
-- [x] Create footer template (`includes/footer.php`)
+## Projects & Complementary Accents
+| # | Project | Primary (kept) | Complementary Accent Added |
+|---|---------|----------------|----------------------------|
+| 1 | Project-Elpis | Deep Blue `#3F5195`, Teal `#4FA08A` | Coral `#E76F51` |
+| 2 | realRealestate | Blue `#1565C0` | Amber/Orange `#FF9800` |
+| 3 | todoList | Blue `#2563eb` | Amber `#F59E0B` |
+| 4 | WiFiSales | Blue `#2563eb` | Amber `#F59E0B` |
+| 5 | portfolio | Blue `#2839d2` | Warm Amber `#F59E0B` |
+| 6 | writing_dev | Purple `#7c3aed` + Green `#22c55e` | Gold `#FBBF24` |
 
-## Phase 4: Public Pages
-- [x] Create Homepage (`index.php`)
-- [x] Create About page (`about.php`)
-- [x] Create Services page (`services.php`)
-- [x] Create Booking page (`booking.php`)
-- [x] Create Articles page (`articles.php`)
-- [x] Create Article detail page (`article.php`)
-- [x] Create Events page (`events.php`)
-- [x] Create Contact page (`contact.php`)
+## Steps
+- [x] 1. Project-Elpis: add coral accent to `assets/css/style.css` + inline PHP color refs
+- [x] 2. realRealestate: add amber accent to `assets/css/style.css` (and admin/pages)
+- [x] 3. todoList: add amber accent to `css/style.css`
+- [x] 4. WiFiSales: add amber accent to `assets/css/style.css`
+- [x] 5. portfolio: add warm amber accent to `css/main.css`
+- [x] 6. writing_dev: add gold accent to `css/style.css`
+- [x] 7. Verify contrast in all projects
 
-## Phase 5: Admin Panel
-- [x] Create Admin Login (`admin/index.php`)
-- [x] Create Admin Dashboard (`admin/dashboard.php`)
-- [x] Create Manage Appointments (`admin/appointments.php`)
-- [x] Create Manage Articles (`admin/manage_articles.php`)
-- [x] Create Manage Events (`admin/manage_events.php`)
-- [x] Create Manage Services (`admin/manage_services.php`)
-- [x] Create Manage Testimonials (`admin/manage_testimonials.php`)
-- [x] Create Admin Logout (`admin/logout.php`)
-
-## Phase 6: Final Touches
-- [x] Add database setup script (`setup.php`)
-- [x] Add session security (CSRF, strict mode, same-site cookies, auto-logout)
-- [x] Add cPanel deployment config (`.cpanel.yml` / `.cp.yml`)
-- [x] Review and test all pages
-- [x] Verify responsive design
-
-## Color Palette
-- Primary Deep Blue: #3F5195
-- Secondary Teal Green: #4FA08A
-- Accent Yellow: #E4CF55
-- Background Cream: #FAF8F2
-- Light Section: #EAF4F1
-- Text Dark Navy: #263447
-- Border/Muted: #D7DDD9
-
-## Design Principles (Client-approved)
-- Cream/white backgrounds dominate
-- Blue & teal used for structure (headers, nav, footer, buttons)
-- Yellow used sparingly as hopeful accent
-
-## Deployment Notes
-- config.php uses live DB credentials (njengas2_elpis_counselling)
-- cPanel deployment tasks configured to push to /home/njengas2/public_html/
-- setup.php and sql/ are excluded from production deployment

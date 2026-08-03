@@ -69,110 +69,166 @@ $services = getAllServices();
 <?php include __DIR__ . '/../includes/header.php';
 $isAdminPage = true; ?>
 <style>
-.admin-layout {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    min-height: 100vh;
-    padding-top: 70px;
-}
+    .admin-layout {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        min-height: 100vh;
+        padding-top: 70px;
+    }
 
-.admin-sidebar {
-    background: #263447;
-    padding: 2rem 1rem;
-    color: #fff;
-}
+    .admin-sidebar {
+        background: #263447;
+        padding: 2rem 1rem;
+        color: #fff;
+        position: sticky;
+        top: 70px;
+        height: calc(100vh - 70px);
+        overflow-y: auto;
+    }
 
-.admin-sidebar h3 {
-    color: #fff;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 1.5rem;
-    padding: 0 1rem;
-}
+    .admin-sidebar h3 {
+        color: #fff;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1.5rem;
+        padding: 0 1rem;
+    }
 
-.admin-sidebar a {
-    display: block;
-    padding: 0.8rem 1rem;
-    color: rgba(255, 255, 255, 0.7);
-    border-radius: 8px;
-    margin-bottom: 0.3rem;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
+    .admin-sidebar a {
+        display: block;
+        padding: 0.8rem 1rem;
+        color: rgba(255, 255, 255, 0.7);
+        border-radius: 8px;
+        margin-bottom: 0.3rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
 
-.admin-sidebar a:hover,
-.admin-sidebar a.active {
-    background: rgba(255, 255, 255, 0.1);
-    color: #E4CF55;
-}
+    .admin-sidebar a:hover,
+    .admin-sidebar a.active {
+        background: rgba(255, 255, 255, 0.1);
+        color: #E76F51;
+    }
 
-.admin-content {
-    padding: 2rem;
-    background: #FAF8F2;
-    min-height: 100vh;
-}
+    .admin-content {
+        padding: 2rem;
+        background: #FAF8F2;
+        min-height: 100vh;
+    }
 
-.admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
 
-.admin-header h1 {
-    font-size: 1.5rem;
-}
+    .admin-header h1 {
+        font-size: 1.5rem;
+    }
 
-.form-container {
-    background: #fff;
-    border-radius: 12px;
-    padding: 2rem;
-    border: 1px solid #D7DDD9;
-    margin-bottom: 2rem;
-}
+    .form-container {
+        background: #fff;
+        border-radius: 12px;
+        padding: 2rem;
+        border: 1px solid #D7DDD9;
+        margin-bottom: 2rem;
+    }
 
-.table-container {
-    background: #fff;
-    border-radius: 12px;
-    padding: 1.5rem;
-    border: 1px solid #D7DDD9;
-    overflow-x: auto;
-}
+    .table-container {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #D7DDD9;
+        overflow-x: auto;
+    }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-}
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
 
-table th {
-    text-align: left;
-    padding: 0.8rem;
-    border-bottom: 2px solid #D7DDD9;
-    color: #3F5195;
-    font-weight: 600;
-}
+    table th {
+        text-align: left;
+        padding: 0.8rem;
+        border-bottom: 2px solid #D7DDD9;
+        color: #3F5195;
+        font-weight: 600;
+    }
 
-table td {
-    padding: 0.8rem;
-    border-bottom: 1px solid #EAF4F1;
-    color: #555;
-}
+    table td {
+        padding: 0.8rem;
+        border-bottom: 1px solid #EAF4F1;
+        color: #555;
+    }
 
-.btn-danger {
-    background: #dc3545;
-    color: #fff;
-}
+    .btn-danger {
+        background: #dc3545;
+        color: #fff;
+    }
 
-.btn-danger:hover {
-    background: #c82333;
-}
+    .btn-danger:hover {
+        background: #c82333;
+    }
 
-.btn-toggle {
-    background: #4FA08A;
-    color: #fff;
-}
+    .btn-toggle {
+        background: #4FA08A;
+        color: #fff;
+    }
+
+    @media (max-width: 992px) {
+        .admin-layout {
+            grid-template-columns: 1fr;
+            padding-top: 60px;
+        }
+
+        .admin-sidebar {
+            position: static;
+            height: auto;
+            padding: 1rem;
+        }
+
+        .admin-sidebar h3 {
+            margin-bottom: 1rem;
+        }
+
+        .admin-sidebar a {
+            display: inline-block;
+            margin: 0.2rem 0.3rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .admin-content {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .admin-content {
+            padding: 1rem;
+        }
+
+        .admin-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .table-container {
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        table {
+            font-size: 0.8rem;
+        }
+
+        table th,
+        table td {
+            padding: 0.6rem;
+        }
+    }
 </style>
 
 <div class="admin-layout">
@@ -196,95 +252,95 @@ table td {
         </div>
 
         <?php if ($message): ?>
-        <div class="alert alert-<?php echo $messageType; ?>"><?php echo h($message); ?></div>
+            <div class="alert alert-<?php echo $messageType; ?>"><?php echo h($message); ?></div>
         <?php endif; ?>
 
         <?php if ($editService || isset($_GET['new'])): ?>
-        <div class="form-container">
-            <form method="POST" action="">
-                <input type="hidden" name="service_id" value="<?php echo $editService['id'] ?? 0; ?>">
-
-                <div class="form-group">
-                    <label for="title">Service Title *</label>
-                    <input type="text" id="title" name="title" class="form-control" required
-                        value="<?php echo h($editService['title'] ?? ''); ?>">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="icon">Icon (emoji or name)</label>
-                        <input type="text" id="icon" name="icon" class="form-control"
-                            value="<?php echo h($editService['icon'] ?? 'heart'); ?>"
-                            placeholder="e.g., heart, briefcase, shield">
-                    </div>
-                    <div class="form-group">
-                        <label for="display_order">Display Order</label>
-                        <input type="number" id="display_order" name="display_order" class="form-control"
-                            value="<?php echo $editService['display_order'] ?? 0; ?>">
-                    </div>
+            <div class="form-container">
+                <form method="POST" action="">
+                    <input type="hidden" name="service_id" value="<?php echo $editService['id'] ?? 0; ?>">
 
                     <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea id="description" name="description" class="form-control"
-                            rows="4"><?php echo h($editService['description'] ?? ''); ?></textarea>
+                        <label for="title">Service Title *</label>
+                        <input type="text" id="title" name="title" class="form-control" required
+                            value="<?php echo h($editService['title'] ?? ''); ?>">
                     </div>
 
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="is_active" value="1"
-                                <?php echo ($editService && $editService['is_active']) ? 'checked' : ''; ?>>
-                            Active (visible on website)
-                        </label>
-                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="icon">Icon (emoji or name)</label>
+                            <input type="text" id="icon" name="icon" class="form-control"
+                                value="<?php echo h($editService['icon'] ?? 'heart'); ?>"
+                                placeholder="e.g., heart, briefcase, shield">
+                        </div>
+                        <div class="form-group">
+                            <label for="display_order">Display Order</label>
+                            <input type="number" id="display_order" name="display_order" class="form-control"
+                                value="<?php echo $editService['display_order'] ?? 0; ?>">
+                        </div>
 
-                    <div style="display:flex;gap:1rem;">
-                        <button type="submit" name="save_service" class="btn btn-primary">Save Service</button>
-                        <a href="<?php echo SITE_URL; ?>/admin/manage_services.php" class="btn btn-secondary">Cancel</a>
-                    </div>
-            </form>
-        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" name="description" class="form-control"
+                                rows="4"><?php echo h($editService['description'] ?? ''); ?></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" name="is_active" value="1"
+                                    <?php echo ($editService && $editService['is_active']) ? 'checked' : ''; ?>>
+                                Active (visible on website)
+                            </label>
+                        </div>
+
+                        <div style="display:flex;gap:1rem;">
+                            <button type="submit" name="save_service" class="btn btn-primary">Save Service</button>
+                            <a href="<?php echo SITE_URL; ?>/admin/manage_services.php" class="btn btn-secondary">Cancel</a>
+                        </div>
+                </form>
+            </div>
         <?php endif; ?>
 
         <div class="table-container">
             <h3>All Services</h3>
             <?php if (count($services) > 0): ?>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Order</th>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($services as $service): ?>
-                    <tr style="<?php echo !$service['is_active'] ? 'opacity:0.6;' : ''; ?>">
-                        <td><?php echo $service['display_order']; ?></td>
-                        <td><strong><?php echo h($service['title']); ?></strong></td>
-                        <td><small><?php echo h(truncateText($service['description'], 60)); ?></small></td>
-                        <td>
-                            <?php echo $service['is_active'] ? '<span style="color:#4FA08A;">Active</span>' : '<span style="color:#999;">Inactive</span>'; ?>
-                        </td>
-                        <td>
-                            <a href="?toggle=<?php echo $service['id']; ?>" class="btn btn-sm btn-toggle"
-                                style="padding:0.3rem 0.8rem;font-size:0.8rem;">
-                                <?php echo $service['is_active'] ? 'Deactivate' : 'Activate'; ?>
-                            </a>
-                            <a href="?edit=<?php echo $service['id']; ?>" class="btn btn-sm btn-primary"
-                                style="padding:0.3rem 0.8rem;font-size:0.8rem;">Edit</a>
-                            <a href="?delete=<?php echo $service['id']; ?>" class="btn btn-sm btn-danger"
-                                style="padding:0.3rem 0.8rem;font-size:0.8rem;"
-                                onclick="return confirm('Delete this service?')">Delete</a>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($services as $service): ?>
+                            <tr style="<?php echo !$service['is_active'] ? 'opacity:0.6;' : ''; ?>">
+                                <td><?php echo $service['display_order']; ?></td>
+                                <td><strong><?php echo h($service['title']); ?></strong></td>
+                                <td><small><?php echo h(truncateText($service['description'], 60)); ?></small></td>
+                                <td>
+                                    <?php echo $service['is_active'] ? '<span style="color:#4FA08A;">Active</span>' : '<span style="color:#999;">Inactive</span>'; ?>
+                                </td>
+                                <td>
+                                    <a href="?toggle=<?php echo $service['id']; ?>" class="btn btn-sm btn-toggle"
+                                        style="padding:0.3rem 0.8rem;font-size:0.8rem;">
+                                        <?php echo $service['is_active'] ? 'Deactivate' : 'Activate'; ?>
+                                    </a>
+                                    <a href="?edit=<?php echo $service['id']; ?>" class="btn btn-sm btn-primary"
+                                        style="padding:0.3rem 0.8rem;font-size:0.8rem;">Edit</a>
+                                    <a href="?delete=<?php echo $service['id']; ?>" class="btn btn-sm btn-danger"
+                                        style="padding:0.3rem 0.8rem;font-size:0.8rem;"
+                                        onclick="return confirm('Delete this service?')">Delete</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             <?php else: ?>
-            <p style="color:#999;text-align:center;padding:2rem;">No services created yet. Click "+ New Service" to get
-                started.</p>
+                <p style="color:#999;text-align:center;padding:2rem;">No services created yet. Click "+ New Service" to get
+                    started.</p>
             <?php endif; ?>
         </div>
     </div>

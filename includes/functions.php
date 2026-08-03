@@ -183,7 +183,7 @@ function sendEmail($to, $subject, $message)
     <body style='font-family: Arial, sans-serif; color: #263447;'>
         <div style='max-width: 600px; margin: 0 auto; background: #FAF8F2; padding: 30px;'>
             <h2 style='color: #3F5195;'>" . SITE_NAME . "</h2>
-            <hr style='border: 1px solid #E4CF55;'>
+            <hr style='border: 1px solid #E76F51;'>
             <div style='padding: 20px 0;'>" . nl2br($message) . "</div>
             <hr style='border: 1px solid #D7DDD9;'>
             <p style='color: #4FA08A; font-size: 12px;'>

@@ -1,7 +1,8 @@
 /* ============================================================
    Elpis Counselling Centre - Main Stylesheet
-   Palette: #3F5195 (Deep Blue), #4FA08A (Teal),
-            #E4CF55 (Yellow Accent), #FAF8F2 (Cream),
+   Color Theory: Complementary Pair (Teal/Blue + Coral)
+   Palette: #3F5195 (Deep Blue) - primary, #4FA08A (Teal) - secondary
+            #E76F51 (Coral) - complementary accent, #FAF8F2 (Cream),
             #EAF4F1 (Pale Teal), #263447 (Dark Text),
             #D7DDD9 (Muted/Border)
    ============================================================ */
@@ -120,10 +121,10 @@ h6 {
 }
 
 .btn-primary:hover {
-    background: #3F5195;
+    background: #E76F51;
     color: #fff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(79, 160, 138, 0.3);
+    box-shadow: 0 4px 15px rgba(231, 111, 81, 0.35);
 }
 
 .btn-secondary {
@@ -139,12 +140,12 @@ h6 {
 }
 
 .btn-accent {
-    background: #E4CF55;
+    background: #E76F51;
     color: #263447;
 }
 
 .btn-accent:hover {
-    background: #d4bf45;
+    background: #c2603f;
     color: #263447;
     transform: translateY(-2px);
 }
@@ -214,7 +215,7 @@ h6 {
 }
 
 .navbar-brand span {
-    color: #E4CF55;
+    color: #E76F51;
 }
 
 .nav-links {
@@ -239,13 +240,13 @@ h6 {
     left: 0;
     width: 0;
     height: 2px;
-    background: #E4CF55;
+    background: #E76F51;
     transition: width 0.3s ease;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
-    color: #E4CF55;
+    color: #E76F51;
 }
 
 .nav-links a:hover::after,
@@ -321,7 +322,7 @@ h6 {
 }
 
 .hero-content h1 span {
-    color: #E4CF55;
+    color: #E76F51;
 }
 
 .hero-content p {
@@ -427,7 +428,7 @@ h6 {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #4FA08A, #E4CF55);
+    background: linear-gradient(90deg, #4FA08A, #E76F51);
     transform: scaleX(0);
     transition: transform 0.3s ease;
 }
@@ -638,7 +639,7 @@ h6 {
 }
 
 .testimonial-stars {
-    color: #E4CF55;
+    color: #E76F51;
     font-size: 1.1rem;
     margin-bottom: 1rem;
 }
@@ -976,7 +977,7 @@ select.form-control {
 }
 
 .footer-links a:hover {
-    color: #E4CF55;
+    color: #E76F51;
 }
 
 .footer-contact li {

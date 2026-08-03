@@ -11,7 +11,7 @@
     <div class="container">
         <div class="footer-grid">
             <div class="footer-about">
-                <h3><span style="color:#E4CF55;">Elpis</span> Counselling Centre</h3>
+                <h3><span style="color:#E76F51;">Elpis</span> Counselling Centre</h3>
                 <p>Your trusted partner in mental health and emotional wellbeing. Based in Westlands, Nairobi, we
                     provide evidence-based, culturally sensitive counselling services for individuals, couples,
                     families, and corporate teams.</p>

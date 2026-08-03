@@ -56,7 +56,7 @@ $isAdminPage = true;
 .admin-sidebar a:hover,
 .admin-sidebar a.active {
     background: rgba(255, 255, 255, 0.1);
-    color: #E4CF55;
+    color: #E76F51;
 }
 
 .admin-content {
