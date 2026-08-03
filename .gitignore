@@ -1,0 +1,22 @@
+# Database schema (sensitive - contains credentials/schema)
+sql/
+
+# Setup script (should not be committed to production)
+setup.php
+
+# Uploaded files (user-generated content)
+uploads/*
+!uploads/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# Logs & temp
+*.log
+task.txt
