@@ -87,7 +87,7 @@
 (function() {
     // Session timeout in milliseconds (5 minutes)
     var SESSION_TIMEOUT = <?php echo defined('SESSION_TIMEOUT') ? SESSION_TIMEOUT * 1000 : 300000; ?>;
-    var logoutUrl = '<?php echo SITE_URL; ?>/admin/logout.php';
+    var logoutUrl = '<?php echo SITE_URL; ?>/admin/logout.php?expired=1';
     var idleTimer = null;
 
     function resetIdleTimer() {

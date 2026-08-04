@@ -27,5 +27,12 @@
 - [x] 8. portfolio: add Policy as Code compliance system (policies/, engine, dashboards, .htaccess, SECURITY.md, COMPLIANCE.md, pipeline gates)
 - [x] 9. portfolio: fix broken images (SITE_URL malformed), preview iframe (X-Frame-Options DENY), 127.0.0.1 refused (HTTPS redirect), admin/ Forbidden (admin/index.php redirect)
 - [x] 10. portfolio: fix modal Close button — `closeProjectModal` is defined in parent page, iframe content now calls `window.parent.closeProjectModal()`
+- [x] 11. Fix cross-project session sharing (security): gave each project a unique PHP session name so logging into one admin no longer grants access to others
+  - Project-Elpis → `ELPIS_SESSION`
+  - portfolio → `PORTFOLIO_SESSION`
+  - realRealestate → `ZAHARA_SESSION` (already unique)
+  - WiFiSales → `wifisales_session` (already unique)
+  - writing_dev → static, no PHP session
+- [x] 12. writing_dev: fix images not showing on production server (case-sensitivity mismatch in `js/script.js` image names)
 
 

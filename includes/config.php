@@ -71,6 +71,9 @@ function getDB()
 function startSession()
 {
     if (session_status() === PHP_SESSION_NONE) {
+        // Unique session name to isolate this project's sessions from other
+        // projects on the same server (prevents cross-project session sharing).
+        session_name('ELPIS_SESSION');
         // Ensure session cookie parameters are applied
         session_set_cookie_params([
             'lifetime' => 0,                          // Expires when browser closes

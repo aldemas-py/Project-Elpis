@@ -67,16 +67,19 @@ function requireAdmin()
  */
 function adminLogout($redirectMessage = '')
 {
-    startSession();
+    $cookieName = session_name();
 
-    // Clear all session variables
-    $_SESSION = [];
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        $_SESSION = [];
+        session_unset();
+        session_destroy();
+        session_write_close();
+    }
 
-    // Delete the session cookie from browser
-    if (ini_get('session.use_cookies')) {
+    if (isset($_COOKIE[$cookieName]) || ini_get('session.use_cookies')) {
         $params = session_get_cookie_params();
         setcookie(
-            session_name(),
+            $cookieName,
             '',
             time() - 42000,
             $params['path'],
@@ -84,14 +87,12 @@ function adminLogout($redirectMessage = '')
             $params['secure'],
             $params['httponly']
         );
+        unset($_COOKIE[$cookieName]);
     }
 
-    // Destroy the server-side session
-    session_destroy();
-
     if ($redirectMessage) {
-        // Start a fresh session just to carry the redirect message
-        session_start();
+        startSession();
+        $_SESSION = [];
         $_SESSION['logout_message'] = $redirectMessage;
         session_write_close();
     }
