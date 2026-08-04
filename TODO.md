@@ -21,7 +21,11 @@
 - [x] 2. realRealestate: add amber accent to `assets/css/style.css` (and admin/pages)
 - [x] 3. todoList: add amber accent to `css/style.css`
 - [x] 4. WiFiSales: add amber accent to `assets/css/style.css`
-- [x] 5. portfolio: add warm amber accent to `css/main.css`
+- [x] 5. portfolio: add warm amber accent to `css/main.css` + `css/theme.css` (redone)
 - [x] 6. writing_dev: add gold accent to `css/style.css`
 - [x] 7. Verify contrast in all projects
+- [x] 8. portfolio: add Policy as Code compliance system (policies/, engine, dashboards, .htaccess, SECURITY.md, COMPLIANCE.md, pipeline gates)
+- [x] 9. portfolio: fix broken images (SITE_URL malformed), preview iframe (X-Frame-Options DENY), 127.0.0.1 refused (HTTPS redirect), admin/ Forbidden (admin/index.php redirect)
+- [x] 10. portfolio: fix modal Close button — `closeProjectModal` is defined in parent page, iframe content now calls `window.parent.closeProjectModal()`
+
 
