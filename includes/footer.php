@@ -12,10 +12,12 @@
         <div class="footer-grid">
             <div class="footer-about">
                 <h3><span style="color:#E76F51;">Elpis</span> Counselling Centre</h3>
-                <p>Your trusted partner in mental health and emotional wellbeing. Based in Westlands, Nairobi, we
+<p>Your trusted partner in mental health and emotional wellbeing. Based in Westlands, Nairobi, we
                     provide evidence-based, culturally sensitive counselling services for individuals, couples,
                     families, and corporate teams.</p>
                 <div class="social-links">
+                    <a href="https://chat.whatsapp.com/Ctq78CoaOcr82hoDUkFoRX?s=cl&p=a&mlu=0" target="_blank"
+                        rel="noopener" aria-label="WhatsApp">W</a>
                     <a href="#" aria-label="Facebook">F</a>
                     <a href="#" aria-label="Twitter">T</a>
                     <a href="#" aria-label="Instagram">I</a>
@@ -48,20 +50,20 @@
                 </ul>
             </div>
 
-            <div>
+<div>
                 <h4>Contact Info</h4>
                 <ul class="footer-contact">
                     <li>
                         <span class="icon">&#9906;</span>
-                        <span>Krishna Centre, 2nd Floor<br>Westlands, Nairobi</span>
+                        <span>Krishna Centre Building, 2nd Floor (Suite D-16)<br>Westlands, Nairobi</span>
                     </li>
                     <li>
                         <span class="icon">&#9742;</span>
-                        <span>+254 700 000 000</span>
+                        <span>0718674888 / 0708854435</span>
                     </li>
                     <li>
                         <span class="icon">&#9993;</span>
-                        <span>info@elpiscounselling.co.ke</span>
+                        <span>elpiscounselling24@gmail.com</span>
                     </li>
                     <li>
                         <span class="icon">&#128339;</span>

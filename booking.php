@@ -71,21 +71,30 @@ include __DIR__ . '/includes/header.php';
                         <span style="color:#4FA08A;font-size:1.3rem;">&#9742;</span>
                         <div>
                             <strong>Call Us</strong>
-                            <p style="color:#666;font-size:0.9rem;">+254 700 000 000</p>
+                            <p style="color:#666;font-size:0.9rem;">0718674888 / 0708854435</p>
                         </div>
                     </div>
                     <div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1.5rem;">
                         <span style="color:#4FA08A;font-size:1.3rem;">&#9993;</span>
                         <div>
                             <strong>Email Us</strong>
-                            <p style="color:#666;font-size:0.9rem;">info@elpiscounselling.co.ke</p>
+                            <p style="color:#666;font-size:0.9rem;">elpiscounselling24@gmail.com</p>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1.5rem;">
+                        <span style="color:#4FA08A;font-size:1.3rem;">&#128172;</span>
+                        <div>
+                            <strong>WhatsApp</strong>
+                            <p style="color:#666;font-size:0.9rem;">Join our WhatsApp group</p>
+                            <a href="https://chat.whatsapp.com/Ctq78CoaOcr82hoDUkFoRX?s=cl&p=a&mlu=0"
+                                target="_blank" rel="noopener">chat.whatsapp.com</a>
                         </div>
                     </div>
                     <div style="display:flex;gap:1rem;align-items:flex-start;">
                         <span style="color:#4FA08A;font-size:1.3rem;">&#9906;</span>
                         <div>
                             <strong>Visit Us</strong>
-                            <p style="color:#666;font-size:0.9rem;">Krishna Centre, 2nd Floor, Westlands, Nairobi</p>
+                            <p style="color:#666;font-size:0.9rem;">Krishna Centre Building, 2nd Floor (Suite D-16), Westlands, Nairobi</p>
                         </div>
                     </div>
                 </div>

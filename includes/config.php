@@ -23,7 +23,7 @@ $scriptDir = str_replace('\\', '/', __DIR__);
 $relativePath = str_replace($docRoot, '', $scriptDir);
 $basePath = dirname($relativePath);
 define('SITE_URL', $protocol . '://' . $host . $basePath);
-define('ADMIN_EMAIL', 'info@elpiscounselling.co.ke');
+define('ADMIN_EMAIL', 'elpiscounselling24@gmail.com');
 
 // M-Pesa Daraja API Configuration (Sandbox)
 define('MPESA_CONSUMER_KEY', 'your_consumer_key');

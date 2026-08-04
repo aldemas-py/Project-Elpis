@@ -59,25 +59,34 @@ include __DIR__ . '/includes/header.php';
                 <p style="margin-top:1rem;color:#555;font-size:1.05rem;">
                     Whether you have a question, need guidance, or are ready to start your counselling journey, our team
                     is here for you.
-                </p>
+</p>
 
                 <div style="margin-top:2.5rem;">
                     <div class="info-card" style="margin-bottom:1rem;">
                         <div class="info-card-icon">&#9906;</div>
                         <h4>Visit Us</h4>
-                        <p>Krishna Centre, 2nd Floor<br>Westlands, Nairobi</p>
+                        <p>Krishna Centre Building, 2nd Floor (Suite D-16)<br>Westlands, Nairobi</p>
                     </div>
 
                     <div class="info-card" style="margin-bottom:1rem;">
                         <div class="info-card-icon">&#9742;</div>
                         <h4>Call Us</h4>
-                        <p>+254 700 000 000<br>+254 700 000 001</p>
+                        <p>0718674888 / 0708854435</p>
+                    </div>
+
+                    <div class="info-card" style="margin-bottom:1rem;">
+                        <div class="info-card-icon">&#9993;</div>
+                        <h4>Email Us</h4>
+                        <p>elpiscounselling24@gmail.com</p>
                     </div>
 
                     <div class="info-card">
-                        <div class="info-card-icon">&#9993;</div>
-                        <h4>Email Us</h4>
-                        <p>info@elpiscounselling.co.ke</p>
+                        <div class="info-card-icon">&#128172;</div>
+                        <h4>WhatsApp</h4>
+                        <p>Join our WhatsApp group to stay connected</p>
+                        <a href="https://chat.whatsapp.com/Ctq78CoaOcr82hoDUkFoRX?s=cl&p=a&mlu=0"
+                            target="_blank" rel="noopener" class="btn btn-primary btn-sm"
+                            style="margin-top:0.75rem;">Join WhatsApp Group</a>
                     </div>
                 </div>
 
