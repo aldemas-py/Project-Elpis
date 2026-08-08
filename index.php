@@ -463,7 +463,7 @@ include __DIR__ . '/includes/header.php';
         var data = galleryData[currentGalleryId];
         if (!data || data.images.length === 0) return;
 
-        var img = data.images[currentImageIndex];
+var img = data.images[currentImageIndex];
         document.querySelector('.gallery-lightbox-img').src = img.src;
         document.querySelector('.gallery-lightbox-img').alt = img.caption || data.name;
         document.querySelector('.gallery-lightbox-title').textContent = data.name;
@@ -472,6 +472,12 @@ include __DIR__ . '/includes/header.php';
         document.querySelector('.gallery-lightbox-desc').textContent = data.desc || '';
         document.querySelector('.gallery-lightbox-counter').textContent =
             (currentImageIndex + 1) + ' / ' + data.images.length;
+
+        // Toggle label blocks based on whether there is content
+        var capBlock = document.querySelector('.gallery-lightbox-caption-block');
+        var descBlock = document.querySelector('.gallery-lightbox-desc-block');
+        if (capBlock) capBlock.classList.toggle('has-caption', !!(img.caption || '').trim());
+        if (descBlock) descBlock.classList.toggle('has-desc', !!(data.desc || '').trim());
     }
 
     // Keyboard navigation

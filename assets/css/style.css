@@ -208,6 +208,10 @@ h6 {
     font-weight: 700;
 }
 
+.navbar-brand:hover {
+    color: #fff;
+}
+
 .navbar-brand img {
     height: 40px;
     width: auto;
@@ -215,6 +219,10 @@ h6 {
 }
 
 .navbar-brand span {
+    color: #E76F51;
+}
+
+.navbar-brand span:hover {
     color: #E76F51;
 }
 

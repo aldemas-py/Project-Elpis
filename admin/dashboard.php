@@ -12,7 +12,7 @@ $stats = getDashboardStats();
 $db = getDB();
 $recentAppointments = $db->query("SELECT * FROM appointments ORDER BY created_at DESC LIMIT 5")->fetchAll();
 
-// Handle therapy room visibility toggle
+// Handle therapy room overall visibility toggle
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_therapy_visible'])) {
     $current = isTherapyRoomVisible();
     setSetting('therapy_room_visible', $current ? '0' : '1');
@@ -20,7 +20,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_therapy_visibl
     exit;
 }
 
+// Handle per-room visibility toggle
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_room_visible'])) {
+    $roomKey = $_POST['room_key'] ?? '';
+    $roomKeys = ['therapy_room_1_visible', 'therapy_room_2_visible'];
+    if (in_array($roomKey, $roomKeys)) {
+        $current = getSetting($roomKey, '1') == '1';
+        setSetting($roomKey, $current ? '0' : '1');
+    }
+    header('Location: ' . SITE_URL . '/admin/dashboard.php?toggled=1');
+    exit;
+}
+
 $therapyVisible = isTherapyRoomVisible();
+$room1Visible = isSpecificRoomVisible('Therapy Room 1');
+$room2Visible = isSpecificRoomVisible('Therapy Room 2');
 
 include __DIR__ . '/../includes/header.php';
 $isAdminPage = true;

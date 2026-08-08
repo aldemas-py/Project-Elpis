@@ -343,11 +343,47 @@ function isTherapyRoomVisible()
 }
 
 /**
- * Get approved therapy room bookings
+ * Check if a specific therapy room is visible to the public
  */
-function getApprovedTherapyBookings()
+function isSpecificRoomVisible($room)
+{
+    $keyMap = [
+        'Therapy Room 1' => 'therapy_room_1_visible',
+        'Therapy Room 2' => 'therapy_room_2_visible',
+    ];
+    $key = $keyMap[$room] ?? null;
+    if ($key === null) {
+        return isTherapyRoomVisible();
+    }
+    return getSetting($key, '1') == '1';
+}
+
+/**
+ * Get the list of therapy rooms that are visible to the public
+ */
+function getVisibleTherapyRooms()
+{
+    $rooms = ['Therapy Room 1', 'Therapy Room 2'];
+    $visible = [];
+    foreach ($rooms as $room) {
+        if (isSpecificRoomVisible($room)) {
+            $visible[] = $room;
+        }
+    }
+    return $visible;
+}
+
+/**
+ * Get approved therapy room bookings (optionally filtered by room)
+ */
+function getApprovedTherapyBookings($room = null)
 {
     $db = getDB();
+    if ($room) {
+        $stmt = $db->prepare("SELECT * FROM therapy_room_bookings WHERE status = 'approved' AND room = ? ORDER BY booking_date ASC, start_time ASC");
+        $stmt->execute([$room]);
+        return $stmt->fetchAll();
+    }
     $stmt = $db->query("SELECT * FROM therapy_room_bookings WHERE status = 'approved' ORDER BY booking_date ASC, start_time ASC");
     return $stmt->fetchAll();
 }

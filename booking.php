@@ -12,12 +12,14 @@ $messageType = '';
 $therapyMessage = '';
 $therapyMessageType = '';
 $therapyVisible = isTherapyRoomVisible();
+$visibleRooms = getVisibleTherapyRooms();
 
 // Handle therapy room booking form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['book_therapy_room'])) {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
+    $room = trim($_POST['room'] ?? 'Therapy Room 1');
     $booking_date = trim($_POST['booking_date'] ?? '');
     $start_time = trim($_POST['start_time'] ?? '');
     $hours = (int)($_POST['hours'] ?? 1);
@@ -31,22 +33,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['book_therapy_room']))
             $startTimestamp = strtotime($start_time);
             $endTime = date('H:i', $startTimestamp + ($hours * 3600));
 
-            // Check for conflicts with approved bookings
+// Check for conflicts with approved bookings for the SAME room
             $stmt = $db->prepare("SELECT COUNT(*) FROM therapy_room_bookings
-                WHERE status = 'approved' AND booking_date = ?
+                WHERE status = 'approved' AND room = ? AND booking_date = ?
                 AND start_time < ? AND ? < ADDTIME(end_time, '0:0:0')");
-            $stmt->execute([$booking_date, $endTime, $start_time]);
+            $stmt->execute([$room, $booking_date, $endTime, $start_time]);
             $conflictCount = $stmt->fetchColumn();
 
             if ($conflictCount > 0) {
-                $therapyMessage = "Sorry, that time slot is already booked. Please select a different time.";
+                $therapyMessage = "Sorry, that time slot is already booked for " . h($room) . ". Please select a different time or room.";
                 $therapyMessageType = 'error';
             } else {
                 // Insert booking
                 $stmt = $db->prepare("INSERT INTO therapy_room_bookings
-                    (name, email, phone, booking_date, start_time, end_time, hours, amount, status)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')");
-                $stmt->execute([$name, $email, $phone, $booking_date, $start_time, $endTime, $hours, $amount]);
+                    (room, name, email, phone, booking_date, start_time, end_time, hours, amount, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')");
+                $stmt->execute([$room, $name, $email, $phone, $booking_date, $start_time, $endTime, $hours, $amount]);
 
                 $emailSubject = "New Therapy Room Booking Request";
                 $emailBody = "A new therapy room booking request has been received:\n\n";
@@ -54,9 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['book_therapy_room']))
                 $emailBody .= "Date: " . formatDate($booking_date) . "\n";
                 $emailBody .= "Time: $start_time - $endTime\n";
                 $emailBody .= "Hours: $hours\nAmount: KES " . number_format($amount, 2) . "\n";
-                sendEmail(ADMIN_EMAIL, $emailSubject, $emailBody);
+sendEmail(ADMIN_EMAIL, $emailSubject, $emailBody);
 
-                $therapyMessage = "Thank you, $name! Your therapy room booking request has been received. Our team will confirm your booking shortly.";
+                $therapyMessage = "Thank you, $name! Your booking request for $room has been received. Our team will confirm your booking shortly.";
                 $therapyMessageType = 'success';
             }
         } catch (Exception $e) {
@@ -526,31 +528,39 @@ include __DIR__ . '/includes/header.php';
             <div class="alert alert-<?php echo $therapyMessageType; ?>"><?php echo h($therapyMessage); ?></div>
             <?php endif; ?>
 
-            <!-- Room Gallery -->
+<!-- Room Gallery (only visible rooms) -->
+            <?php
+            $roomMeta = [
+                'Therapy Room 1' => ['img' => 'image1.jpeg', 'desc' => 'Our serene first therapy room, designed for comfort and privacy.'],
+                'Therapy Room 2' => ['img' => 'image2.jpeg', 'desc' => 'Our spacious second therapy room, ideal for individual and couple sessions.'],
+            ];
+            ?>
             <div class="section-header" style="text-align:left;margin-bottom:2rem;">
                 <p class="section-subtitle">Our Therapy Rooms</p>
                 <h2>Choose a Comfortable Space</h2>
-                <p>Book our private therapy rooms at KES 500 per hour. Select a date, time, and duration below.</p>
+                <p>Book our private therapy rooms at KES 500 per hour. Select a room, date, time, and duration below.</p>
             </div>
 
+            <?php if (count($visibleRooms) > 0): ?>
             <div class="room-gallery">
+                <?php foreach ($visibleRooms as $roomName): $meta = $roomMeta[$roomName] ?? null; ?>
                 <div class="room-card">
-                    <img src="<?php echo SITE_URL; ?>/images/image1.jpeg" alt="Therapy Room 1">
+                    <img src="<?php echo SITE_URL; ?>/images/<?php echo h($meta['img'] ?? 'image1.jpeg'); ?>" alt="<?php echo h($roomName); ?>">
                     <div class="room-card-body">
-                        <h4>Therapy Room 1</h4>
-                        <p>Our serene first therapy room, designed for comfort and privacy.</p>
+                        <h4><?php echo h($roomName); ?></h4>
+                        <p><?php echo h($meta['desc'] ?? 'Private therapy room, designed for comfort and privacy.'); ?></p>
                         <span class="room-price">KES 500 / hour</span>
                     </div>
                 </div>
-                <div class="room-card">
-                    <img src="<?php echo SITE_URL; ?>/images/image2.jpeg" alt="Therapy Room 2">
-                    <div class="room-card-body">
-                        <h4>Therapy Room 2</h4>
-                        <p>Our spacious second therapy room, ideal for individual and couple sessions.</p>
-                        <span class="room-price">KES 500 / hour</span>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
+            <?php else: ?>
+            <div class="empty-state" style="text-align:center;padding:2rem;">
+                <div class="icon">&#128719;</div>
+                <h3 style="margin-bottom:0.5rem;">No Therapy Rooms Available</h3>
+                <p>Our therapy rooms are currently unavailable. Please check back later or contact us directly.</p>
+            </div>
+            <?php endif; ?>
 
             <!-- Booking Form -->
             <div class="calendar-section">
@@ -558,6 +568,17 @@ include __DIR__ . '/includes/header.php';
                     <input type="hidden" name="book_therapy_room" value="1">
                     <input type="hidden" name="booking_date" id="selected_date">
                     <input type="hidden" name="start_time" id="selected_time">
+
+                    <?php if (count($visibleRooms) > 0): ?>
+                    <div class="form-group" style="margin-bottom:2rem;">
+                        <label for="room_select">Select Therapy Room *</label>
+                        <select id="room_select" name="room" class="form-control" onchange="changeRoom()" required>
+                            <?php foreach ($visibleRooms as $roomName): ?>
+                            <option value="<?php echo h($roomName); ?>"><?php echo h($roomName); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <?php endif; ?>
 
                     <div class="form-row" style="margin-bottom:2rem;">
                         <div class="form-group">
@@ -637,9 +658,10 @@ include __DIR__ . '/includes/header.php';
 <?php
 // Pass approved bookings to JS for marking unavailable slots
 $approvedBookings = getApprovedTherapyBookings();
-$blockedSlots = [];
+$roomBlockedSlots = [];
 foreach ($approvedBookings as $bk) {
-    $blockedSlots[$bk['booking_date']][] = [
+    $broom = $bk['room'] ?: 'Therapy Room 1';
+    $roomBlockedSlots[$broom][$bk['booking_date']][] = [
         'start' => $bk['start_time'],
         'end' => $bk['end_time']
     ];
@@ -647,8 +669,9 @@ foreach ($approvedBookings as $bk) {
 ?>
 
 <script>
-// Approved bookings passed from server (date => [start, end])
-var blockedSlots = <?php echo json_encode($blockedSlots); ?>;
+// Approved bookings passed from server (room => date => [[start, end], ...])
+var roomBlockedSlots = <?php echo json_encode($roomBlockedSlots); ?>;
+var selectedRoom = null;
 var selectedDate = null;
 var selectedTime = null;
 var currentMonth = new Date();
@@ -751,12 +774,32 @@ function selectDate(key, el) {
     renderTimeSlots(key);
 }
 
+function changeRoom() {
+    var roomSel = document.getElementById('room_select');
+    if (roomSel) selectedRoom = roomSel.value;
+    selectedDate = null;
+    selectedTime = null;
+    document.getElementById('selected_date').value = '';
+    document.getElementById('selected_time').value = '';
+    document.getElementById('timeSlotsSection').classList.add('hidden');
+    document.getElementById('summarySection').classList.add('hidden');
+    // Clear any selected calendar day
+    document.querySelectorAll('.calendar-day').forEach(function(d) {
+        d.classList.remove('selected');
+    });
+    renderCalendar();
+}
+
 function renderTimeSlots(dateKey) {
     var container = document.getElementById('timeSlots');
     var section = document.getElementById('timeSlotsSection');
     container.innerHTML = '';
 
-    var slots = blockedSlots[dateKey] || [];
+    // Filter blocked slots by the currently selected room
+    var roomKey = selectedRoom || (document.getElementById('room_select') ? document.getElementById('room_select').value : null);
+    if (!roomKey) roomKey = 'Therapy Room 1';
+    var roomSlots = roomBlockedSlots[roomKey] || {};
+    var slots = roomSlots[dateKey] || [];
     var blocked = [];
     slots.forEach(function(b) {
         blocked.push([b.start, b.end]);
@@ -856,6 +899,10 @@ function updateSummary() {
 }
 
 // Initialize
+var roomSelInit = document.getElementById('room_select');
+if (roomSelInit) {
+    selectedRoom = roomSelInit.value;
+}
 renderCalendar();
 </script>
 
