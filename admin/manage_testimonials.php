@@ -231,10 +231,12 @@ $isAdminPage = true;
     <div class="admin-sidebar">
         <h3>Admin Panel</h3>
         <a href="<?php echo SITE_URL; ?>/admin/dashboard.php">Dashboard</a>
-        <a href="<?php echo SITE_URL; ?>/admin/appointments.php">Appointments</a>
+<a href="<?php echo SITE_URL; ?>/admin/appointments.php">Appointments</a>
+        <a href="<?php echo SITE_URL; ?>/admin/therapy_bookings.php">Therapy Room</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_services.php">Services</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php">Articles</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">Events</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_gallery.php">Gallery</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php" class="active">Testimonials</a>
         <hr style="border-color:rgba(255,255,255,0.1);margin:1.5rem 0;">
         <a href="<?php echo SITE_URL; ?>/index.php">View Site</a>

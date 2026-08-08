@@ -287,10 +287,15 @@ table td {
                 <div class="stat-value"><?php echo $stats['total_testimonials']; ?></div>
                 <div class="stat-label">Approved Testimonials</div>
             </div>
-            <div class="stat-card">
+<div class="stat-card">
                 <div class="stat-icon">&#128719;</div>
                 <div class="stat-value"><?php echo $stats['pending_therapy_bookings']; ?></div>
                 <div class="stat-label">Pending Therapy Room</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">&#128248;</div>
+                <div class="stat-value"><?php echo $stats['total_galleries']; ?></div>
+                <div class="stat-label">Published Galleries</div>
             </div>
         </div>
 

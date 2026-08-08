@@ -17,17 +17,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_gallery'])) {
     $event_name = trim($_POST['event_name']);
     $event_date = trim($_POST['event_date']) ?: null;
     $description = trim($_POST['description']);
+    $frame_size = trim($_POST['frame_size'] ?? 'standard');
+    $allowed_sizes = ['standard', 'large', 'tall', 'wide'];
+    if (!in_array($frame_size, $allowed_sizes)) $frame_size = 'standard';
     $is_published = isset($_POST['is_published']) ? 1 : 0;
 
     if ($event_name) {
         try {
             if ($id > 0) {
-                $stmt = $db->prepare("UPDATE gallery_events SET event_name=?, event_date=?, description=?, is_published=? WHERE id=?");
-                $stmt->execute([$event_name, $event_date, $description, $is_published, $id]);
+                $stmt = $db->prepare("UPDATE gallery_events SET event_name=?, event_date=?, description=?, frame_size=?, is_published=? WHERE id=?");
+                $stmt->execute([$event_name, $event_date, $description, $frame_size, $is_published, $id]);
                 $message = 'Gallery event updated successfully.';
             } else {
-                $stmt = $db->prepare("INSERT INTO gallery_events (event_name, event_date, description, is_published) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$event_name, $event_date, $description, $is_published]);
+                $stmt = $db->prepare("INSERT INTO gallery_events (event_name, event_date, description, frame_size, is_published) VALUES (?, ?, ?, ?, ?)");
+                $stmt->execute([$event_name, $event_date, $description, $frame_size, $is_published]);
                 $id = (int)$db->lastInsertId();
                 $message = 'Gallery event created successfully.';
             }
@@ -437,10 +440,30 @@ $isAdminPage = true; ?>
                         </div>
                     </div>
 
-                    <div class="form-group">
+<div class="form-group">
                         <label for="description">Brief Description</label>
                         <textarea id="description" name="description" class="form-control"
                             rows="3"><?php echo h($editGallery['description'] ?? ''); ?></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="frame_size">Frame Size (Masonry Grid)</label>
+                        <select id="frame_size" name="frame_size" class="form-control">
+                            <?php
+                            $frameSizes = [
+                                'standard' => 'Standard',
+                                'large' => 'Large (Wide + Tall)',
+                                'tall' => 'Tall',
+                                'wide' => 'Wide',
+                            ];
+                            $currentFrame = $editGallery['frame_size'] ?? 'standard';
+                            foreach ($frameSizes as $val => $label): ?>
+                                <option value="<?php echo $val; ?>" <?php echo $currentFrame == $val ? 'selected' : ''; ?>>
+                                    <?php echo $label; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small style="color:#999;">Choose how large this gallery item appears in the masonry grid.</small>
                     </div>
 
                     <div class="form-group">

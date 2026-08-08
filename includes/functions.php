@@ -305,7 +305,8 @@ function getDashboardStats()
     $stats['total_events'] = $db->query("SELECT COUNT(*) FROM events WHERE is_published = 1")->fetchColumn();
     $stats['pending_appointments'] = $db->query("SELECT COUNT(*) FROM appointments WHERE status = 'pending'")->fetchColumn();
     $stats['total_testimonials'] = $db->query("SELECT COUNT(*) FROM testimonials WHERE is_approved = 1")->fetchColumn();
-    $stats['pending_therapy_bookings'] = $db->query("SELECT COUNT(*) FROM therapy_room_bookings WHERE status = 'pending'")->fetchColumn();
+$stats['pending_therapy_bookings'] = $db->query("SELECT COUNT(*) FROM therapy_room_bookings WHERE status = 'pending'")->fetchColumn();
+    $stats['total_galleries'] = $db->query("SELECT COUNT(*) FROM gallery_events WHERE is_published = 1")->fetchColumn();
 
     return $stats;
 }

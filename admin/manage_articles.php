@@ -250,9 +250,11 @@ $isAdminPage = true; ?>
         <h3>Admin Panel</h3>
         <a href="<?php echo SITE_URL; ?>/admin/dashboard.php">&#9632; Dashboard</a>
         <a href="<?php echo SITE_URL; ?>/admin/appointments.php">&#9997; Appointments</a>
+        <a href="<?php echo SITE_URL; ?>/admin/therapy_bookings.php">&#128719; Therapy Room</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_services.php">&#9733; Services</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php" class="active">&#128218; Articles</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">&#128197; Events</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_gallery.php">&#128248; Gallery</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php">&#9733; Testimonials</a>
         <hr style="border-color:rgba(255,255,255,0.1);margin:1.5rem 0;">
         <a href="<?php echo SITE_URL; ?>/index.php">&#8592; View Site</a>

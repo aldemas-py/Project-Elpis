@@ -34,6 +34,7 @@
                     <li><a href="<?php echo SITE_URL; ?>/booking.php">Book a Session</a></li>
                     <li><a href="<?php echo SITE_URL; ?>/articles.php">Articles & Resources</a></li>
                     <li><a href="<?php echo SITE_URL; ?>/events.php">Upcoming Events</a></li>
+                    <li><a href="<?php echo SITE_URL; ?>/gallery.php">Gallery</a></li>
                 </ul>
             </div>
 

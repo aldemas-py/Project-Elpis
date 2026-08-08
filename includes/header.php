@@ -59,6 +59,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     class="<?php echo $current_page == 'articles.php' ? 'active' : ''; ?>">Articles</a>
                 <a href="<?php echo SITE_URL; ?>/events.php"
                     class="<?php echo $current_page == 'events.php' ? 'active' : ''; ?>">Events</a>
+                <a href="<?php echo SITE_URL; ?>/gallery.php"
+                    class="<?php echo $current_page == 'gallery.php' ? 'active' : ''; ?>">Gallery</a>
                 <a href="<?php echo SITE_URL; ?>/contact.php"
                     class="<?php echo $current_page == 'contact.php' ? 'active' : ''; ?>">Contact</a>
             </div>
