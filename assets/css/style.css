@@ -1585,6 +1585,40 @@ select.form-control {
     margin-top: 0.3rem;
 }
 
+.gallery-lightbox-caption-block,
+.gallery-lightbox-desc-block {
+    margin-top: 0.6rem;
+}
+
+.gallery-lightbox-label {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #E76F51;
+    background: rgba(231, 111, 81, 0.15);
+    padding: 0.15rem 0.6rem;
+    border-radius: 50px;
+    margin-bottom: 0.3rem;
+}
+
+.gallery-lightbox-caption-block{
+    display: none;
+}
+
+.gallery-lightbox-caption-block.has-caption {
+    display: block;
+}
+
+.gallery-lightbox-desc-block {
+    display: none;
+}
+
+.gallery-lightbox-desc-block.has-desc {
+    display: block;
+}
+
 .gallery-lightbox-counter {
     color: rgba(255, 255, 255, 0.5);
     font-size: 0.8rem;
