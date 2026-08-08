@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_gallery'])) {
     if (!in_array($frame_size, $allowed_sizes)) $frame_size = 'standard';
     $is_published = isset($_POST['is_published']) ? 1 : 0;
 
-    if ($event_name) {
+if ($event_name) {
         try {
             if ($id > 0) {
                 $stmt = $db->prepare("UPDATE gallery_events SET event_name=?, event_date=?, description=?, frame_size=?, is_published=? WHERE id=?");
@@ -35,6 +35,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_gallery'])) {
                 $message = 'Gallery event created successfully.';
             }
             $messageType = 'success';
+
+            // If images were uploaded with the save form, process them
+            if (isset($_FILES['images']) && is_array($_FILES['images']['name'])) {
+                $files = $_FILES['images'];
+                $nextOrder = count(getGalleryImages($id));
+                for ($i = 0; $i < count($files['name']); $i++) {
+                    if ($files['error'][$i] === UPLOAD_ERR_OK) {
+                        $fileArray = [
+                            'name' => $files['name'][$i],
+                            'type' => $files['type'][$i],
+                            'tmp_name' => $files['tmp_name'][$i],
+                            'error' => $files['error'][$i],
+                            'size' => $files['size'][$i],
+                        ];
+                        try {
+                            $filename = uploadImage($fileArray);
+                            if ($filename) {
+                                $caption = trim($_POST['captions'][$i] ?? '');
+                                $db->prepare("INSERT INTO gallery_images (gallery_event_id, image, caption, display_order) VALUES (?, ?, ?, ?)")
+                                    ->execute([$id, $filename, $caption, $nextOrder]);
+                                $nextOrder++;
+                            }
+                        } catch (Exception $e) {
+                            $message = $e->getMessage();
+                            $messageType = 'error';
+                        }
+                    }
+                }
+                // Set featured image to first upload if none already set
+                $stmt = $db->prepare("SELECT featured_image FROM gallery_events WHERE id = ?");
+                $stmt->execute([$id]);
+                if (!$stmt->fetchColumn()) {
+                    $img = getGalleryImages($id);
+                    if (count($img) > 0) {
+                        $db->prepare("UPDATE gallery_events SET featured_image = ? WHERE id = ?")->execute([$img[0]['image'], $id]);
+                    }
+                }
+            }
+
+            // Reload the gallery so the image upload section reflects new state
+            $editGallery = getGalleryEventById($id);
         } catch (Exception $e) {
             $message = $e->getMessage();
             $messageType = 'error';
@@ -85,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_images'])) {
 
     if ($successCount > 0) {
         // Set first image as featured if no featured image yet
-        $stmt = $db->prepare("SELECT image FROM gallery_events WHERE id = ?");
+        $stmt = $db->prepare("SELECT featured_image FROM gallery_events WHERE id = ?");
         $stmt->execute([$gallery_id]);
         if (!$stmt->fetchColumn()) {
             $img = getGalleryImages($gallery_id);
@@ -166,10 +207,12 @@ if (isset($_GET['delete'])) {
     $messageType = 'success';
 }
 
-// Get edit data
-$editGallery = null;
-if (isset($_GET['edit'])) {
+// Get edit data (preserve $editGallery if already set by a save operation above)
+if (!isset($editGallery) && isset($_GET['edit'])) {
     $editGallery = getGalleryEventById((int)$_GET['edit']);
+}
+if (!isset($editGallery)) {
+    $editGallery = null;
 }
 
 $galleries = $db->query("SELECT * FROM gallery_events ORDER BY event_date DESC, created_at DESC")->fetchAll();
@@ -424,7 +467,7 @@ $isAdminPage = true; ?>
 
         <?php if ($editGallery || isset($_GET['new'])): ?>
             <div class="form-container">
-                <form method="POST" action="">
+                <form method="POST" action="" enctype="multipart/form-data">
                     <input type="hidden" name="gallery_id" value="<?php echo $editGallery['id'] ?? 0; ?>">
 
                     <div class="form-row">
@@ -440,7 +483,16 @@ $isAdminPage = true; ?>
                         </div>
                     </div>
 
-<div class="form-group">
+                    <div class="form-group">
+                        <label for="images">Upload Images (Multiple Allowed)</label>
+                        <input type="file" id="images" name="images[]" class="form-control" accept="image/*" multiple
+                            onchange="showCaptionInputs(this)">
+                        <small style="color:#999;">You can select multiple images. JPG, PNG, GIF, WEBP (max 5MB each).
+                            Images are added when you save this gallery.</small>
+                        <div id="captionInputs" style="margin-top:0.75rem;"></div>
+                    </div>
+
+                    <div class="form-group">
                         <label for="description">Brief Description</label>
                         <textarea id="description" name="description" class="form-control"
                             rows="3"><?php echo h($editGallery['description'] ?? ''); ?></textarea>
@@ -480,22 +532,8 @@ $isAdminPage = true; ?>
                     </div>
                 </form>
 
-                <?php if ($editGallery && $editGallery['id']): ?>
+<?php if ($editGallery && $editGallery['id']): ?>
                     <hr style="border:none;border-top:1px solid #D7DDD9;margin:2rem 0;">
-
-                    <h3 style="margin-bottom:1rem;">Upload Images</h3>
-                    <form method="POST" action="" enctype="multipart/form-data">
-                        <input type="hidden" name="gallery_id" value="<?php echo $editGallery['id']; ?>">
-                        <div class="form-group">
-                            <label for="images">Select Images (Multiple Allowed)</label>
-                            <input type="file" id="images" name="images[]" class="form-control" accept="image/*"
-                                multiple>
-                            <small style="color:#999;">You can select multiple images. JPG, PNG, GIF, WEBP (max 5MB
-                                each).</small>
-                        </div>
-                        <div id="captionRows"></div>
-                        <button type="submit" name="upload_images" class="btn btn-primary">Upload Images</button>
-                    </form>
 
                     <?php if ($imageList = getGalleryImages($editGallery['id'])): ?>
                         <div class="gallery-thumb-grid">
@@ -589,5 +627,28 @@ $isAdminPage = true; ?>
         </div>
     </div>
 </div>
+
+<script>
+    function showCaptionInputs(input) {
+        var container = document.getElementById('captionInputs');
+        container.innerHTML = '';
+        var files = input.files || [];
+        for (var i = 0; i < files.length; i++) {
+            var row = document.createElement('div');
+            row.style.cssText = 'display:flex;gap:0.5rem;align-items:center;margin-bottom:0.4rem;';
+            var num = document.createElement('span');
+            num.textContent = (i + 1) + '. ' + files[i].name;
+            num.style.cssText = 'font-size:0.85rem;color:#555;min-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+            var cap = document.createElement('input');
+            cap.type = 'text';
+            cap.name = 'captions[]';
+            cap.className = 'form-control';
+            cap.placeholder = 'Caption / description for this image (optional)';
+            row.appendChild(num);
+            row.appendChild(cap);
+            container.appendChild(row);
+        }
+    }
+</script>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

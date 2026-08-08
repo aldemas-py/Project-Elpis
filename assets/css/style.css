@@ -1419,6 +1419,11 @@ select.form-control {
     min-height: 340px;
 }
 
+.gallery-item-wide {
+    grid-column: span 2;
+    min-height: 260px;
+}
+
 .gallery-item-media {
     position: relative;
     width: 100%;
