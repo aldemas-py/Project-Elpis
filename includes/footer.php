@@ -18,11 +18,10 @@
                 <div class="social-links">
                     <a href="https://chat.whatsapp.com/Ctq78CoaOcr82hoDUkFoRX?s=cl&p=a&mlu=0" target="_blank"
                         rel="noopener" aria-label="WhatsApp">W</a>
-                    <a href="#" aria-label="Facebook">F</a>
-                    <a href="#" aria-label="Twitter">T</a>
-                    <a href="#" aria-label="Instagram">I</a>
-                    <a href="#" aria-label="LinkedIn">L</a>
-                    <a href="#" aria-label="YouTube">Y</a>
+                    <a href="https://www.instagram.com/elpiscounselingcenter" target="_blank" rel="noopener"
+                        aria-label="Instagram">I</a>
+                    <a href="https://www.facebook.com/people/Elpis-Counseling-Centre/61584859559119/" target="_blank"
+                        rel="noopener" aria-label="Facebook">F</a>
                 </div>
             </div>
 

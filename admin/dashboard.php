@@ -12,6 +12,16 @@ $stats = getDashboardStats();
 $db = getDB();
 $recentAppointments = $db->query("SELECT * FROM appointments ORDER BY created_at DESC LIMIT 5")->fetchAll();
 
+// Handle therapy room visibility toggle
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_therapy_visible'])) {
+    $current = isTherapyRoomVisible();
+    setSetting('therapy_room_visible', $current ? '0' : '1');
+    header('Location: ' . SITE_URL . '/admin/dashboard.php?toggled=1');
+    exit;
+}
+
+$therapyVisible = isTherapyRoomVisible();
+
 include __DIR__ . '/../includes/header.php';
 $isAdminPage = true;
 ?>
@@ -232,11 +242,13 @@ table td {
 <div class="admin-layout">
     <div class="admin-sidebar">
         <h3>Admin Panel</h3>
-        <a href="<?php echo SITE_URL; ?>/admin/dashboard.php" class="active">Dashboard</a>
+<a href="<?php echo SITE_URL; ?>/admin/dashboard.php" class="active">Dashboard</a>
         <a href="<?php echo SITE_URL; ?>/admin/appointments.php">Appointments</a>
+        <a href="<?php echo SITE_URL; ?>/admin/therapy_bookings.php">Therapy Room</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_services.php">Services</a>
-        <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php">Articles</a>
+<a href="<?php echo SITE_URL; ?>/admin/manage_articles.php">Articles</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">Events</a>
+        <a href="<?php echo SITE_URL; ?>/admin/manage_gallery.php">Gallery</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php">Testimonials</a>
         <hr style="border-color:rgba(255,255,255,0.1);margin:1.5rem 0;">
         <a href="<?php echo SITE_URL; ?>/index.php">View Site</a>
@@ -275,6 +287,26 @@ table td {
                 <div class="stat-value"><?php echo $stats['total_testimonials']; ?></div>
                 <div class="stat-label">Approved Testimonials</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-icon">&#128719;</div>
+                <div class="stat-value"><?php echo $stats['pending_therapy_bookings']; ?></div>
+                <div class="stat-label">Pending Therapy Room</div>
+            </div>
+        </div>
+
+        <!-- Therapy Room Availability Toggle -->
+        <div class="table-container" style="margin-bottom:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+            <div>
+                <h3 style="margin-bottom:0.3rem;">&#128719; Therapy Room Booking Availability</h3>
+                <p style="color:#999;font-size:0.85rem;">Control whether visitors can see the therapy room booking calendar on the public site.</p>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="toggle_therapy_visible" value="1">
+                <button type="submit" class="btn <?php echo $therapyVisible ? 'btn-approve' : 'btn-secondary'; ?>"
+                    style="<?php echo $therapyVisible ? '' : 'border:2px solid #E76F51;color:#E76F51;'; ?>">
+                    <?php echo $therapyVisible ? '&#10004; Visible — Click to Hide' : '&#10008; Hidden — Click to Show'; ?>
+                </button>
+            </form>
         </div>
 
         <div class="table-container">

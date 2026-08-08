@@ -305,6 +305,102 @@ function getDashboardStats()
     $stats['total_events'] = $db->query("SELECT COUNT(*) FROM events WHERE is_published = 1")->fetchColumn();
     $stats['pending_appointments'] = $db->query("SELECT COUNT(*) FROM appointments WHERE status = 'pending'")->fetchColumn();
     $stats['total_testimonials'] = $db->query("SELECT COUNT(*) FROM testimonials WHERE is_approved = 1")->fetchColumn();
+    $stats['pending_therapy_bookings'] = $db->query("SELECT COUNT(*) FROM therapy_room_bookings WHERE status = 'pending'")->fetchColumn();
 
     return $stats;
+}
+
+/**
+ * Get a setting value from the settings table
+ */
+function getSetting($key, $default = null)
+{
+    $db = getDB();
+    $stmt = $db->prepare("SELECT setting_value FROM settings WHERE setting_key = ?");
+    $stmt->execute([$key]);
+    $value = $stmt->fetchColumn();
+    return $value === false ? $default : $value;
+}
+
+/**
+ * Set a setting value in the settings table
+ */
+function setSetting($key, $value)
+{
+    $db = getDB();
+    $stmt = $db->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)");
+    return $stmt->execute([$key, $value]);
+}
+
+/**
+ * Check if therapy room booking availability is visible to the public
+ */
+function isTherapyRoomVisible()
+{
+    return getSetting('therapy_room_visible', '1') == '1';
+}
+
+/**
+ * Get approved therapy room bookings
+ */
+function getApprovedTherapyBookings()
+{
+    $db = getDB();
+    $stmt = $db->query("SELECT * FROM therapy_room_bookings WHERE status = 'approved' ORDER BY booking_date ASC, start_time ASC");
+    return $stmt->fetchAll();
+}
+
+/**
+ * Get all therapy room bookings (for admin)
+ */
+function getAllTherapyBookings()
+{
+    $db = getDB();
+    $stmt = $db->query("SELECT * FROM therapy_room_bookings ORDER BY booking_date DESC, start_time DESC");
+    return $stmt->fetchAll();
+}
+
+/**
+ * Get published gallery events
+ */
+function getGalleryEvents($limit = 0)
+{
+    $db = getDB();
+    $sql = "SELECT * FROM gallery_events WHERE is_published = 1 ORDER BY event_date DESC, created_at DESC";
+    if ($limit > 0) {
+        $sql .= " LIMIT " . (int)$limit;
+    }
+    return $db->query($sql)->fetchAll();
+}
+
+/**
+ * Get all gallery events (including unpublished, for admin)
+ */
+function getAllGalleryEvents()
+{
+    $db = getDB();
+    return $db->query("SELECT * FROM gallery_events ORDER BY event_date DESC, created_at DESC")->fetchAll();
+}
+
+/**
+ * Get a single gallery event by ID
+ */
+function getGalleryEventById($id)
+{
+    $db = getDB();
+    $stmt = $db->prepare("SELECT * FROM gallery_events WHERE id = ?");
+    $stmt->execute([$id]);
+    return $stmt->fetch();
+}
+
+/**
+ * Get images for a gallery event
+ */
+function getGalleryImages($galleryEventId)
+{
+    $db = getDB();
+    $stmt = $db->prepare("SELECT * FROM gallery_images WHERE gallery_event_id = ? ORDER BY display_order ASC, id ASC");
+    $stmt->execute([$galleryEventId]);
+    return $stmt->fetchAll();
 }

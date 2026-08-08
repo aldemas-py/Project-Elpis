@@ -237,6 +237,7 @@ table tbody tr:hover {
         <h3>Admin Panel</h3>
         <a href="<?php echo SITE_URL; ?>/admin/dashboard.php">Dashboard</a>
         <a href="<?php echo SITE_URL; ?>/admin/appointments.php" class="active">Appointments</a>
+        <a href="<?php echo SITE_URL; ?>/admin/therapy_bookings.php">Therapy Room</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_services.php">Services</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php">Articles</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">Events</a>
