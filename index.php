@@ -10,6 +10,7 @@ $services = getServices();
 $testimonials = getTestimonials();
 $articles = getArticles(3);
 $events = getUpcomingEvents(3);
+$galleryEvents = getGalleryEvents(6);
 
 include __DIR__ . '/includes/header.php';
 ?>
@@ -87,6 +88,75 @@ include __DIR__ . '/includes/header.php';
             <div style="margin-top:2rem;">
                 <a href="<?php echo SITE_URL; ?>/about.php" class="btn btn-primary">Learn More About Us</a>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     GALLERY OVERVIEW
+     ============================================================ -->
+<section class="section section-white">
+    <div class="container">
+        <div class="section-header">
+            <p class="section-subtitle">Our Gallery</p>
+            <h2>Moments From Our Events</h2>
+            <p>A visual glimpse of our events, workshops, and the shared experiences that make our community stronger.</p>
+        </div>
+
+        <?php if (count($galleryEvents) > 0): ?>
+            <div class="gallery-masonry homepage-gallery">
+                <?php foreach ($galleryEvents as $gal):
+                    $gImages = getGalleryImages($gal['id']);
+                    $gFeatured = $gal['featured_image'] ?: ($gImages[0]['image'] ?? '');
+                    $gFrameMap = [
+                        'standard' => '',
+                        'large' => 'gallery-item-large',
+                        'tall' => 'gallery-item-tall',
+                        'wide' => 'gallery-item-wide',
+                    ];
+                    $gSizeClass = $gFrameMap[$gal['frame_size'] ?? 'standard'] ?? '';
+                ?>
+                    <div class="gallery-item <?php echo $gSizeClass; ?>" data-gallery-id="<?php echo $gal['id']; ?>"
+                        data-event-name="<?php echo h($gal['event_name']); ?>"
+                        data-event-date="<?php echo formatDate($gal['event_date']); ?>"
+                        data-description="<?php echo h($gal['description']); ?>">
+                        <div class="gallery-item-media">
+                            <?php if ($gFeatured): ?>
+                                <img src="<?php echo SITE_URL; ?>/uploads/<?php echo h($gFeatured); ?>"
+                                    alt="<?php echo h($gal['event_name']); ?>" class="gallery-featured">
+                            <?php else: ?>
+                                <div class="gallery-placeholder">&#128248;</div>
+                            <?php endif; ?>
+
+                            <?php if (count($gImages) > 1): ?>
+                                <div class="gallery-slider">
+                                    <?php foreach ($gImages as $gi => $gImg): ?>
+                                        <img src="<?php echo SITE_URL; ?>/uploads/<?php echo h($gImg['image']); ?>"
+                                            alt="<?php echo h($gal['event_name']); ?> - image <?php echo $gi + 1; ?>"
+                                            data-caption="<?php echo h($gImg['caption']); ?>">
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="gallery-item-overlay">
+                            <h3><?php echo h($gal['event_name']); ?></h3>
+                            <span class="gallery-item-date">&#128197; <?php echo formatDate($gal['event_date']); ?></span>
+                            <?php if ($gal['description']): ?>
+                                <p><?php echo h(truncateText($gal['description'], 90)); ?></p>
+                            <?php endif; ?>
+                            <span class="gallery-view-hint">&#128269; Click to view</span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div style="text-align:center;padding:2rem;">
+                <p style="color:#999;">Our gallery is being prepared. Check back soon for photos from our events and workshops.</p>
+            </div>
+        <?php endif; ?>
+
+        <div style="text-align:center;margin-top:2.5rem;">
+            <a href="<?php echo SITE_URL; ?>/gallery.php" class="btn btn-primary">View Full Gallery</a>
         </div>
     </div>
 </section>
@@ -270,5 +340,154 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 </section>
+
+<!-- Lightbox for homepage gallery -->
+<div id="galleryLightbox" class="gallery-lightbox" style="display:none;">
+    <button class="gallery-lightbox-close" onclick="closeGalleryLightbox()">&times;</button>
+    <button class="gallery-lightbox-nav gallery-prev" onclick="galleryNav(-1)">&#10094;</button>
+    <div class="gallery-lightbox-content">
+        <div class="gallery-lightbox-slider">
+            <img src="" alt="Gallery image" class="gallery-lightbox-img">
+        </div>
+<div class="gallery-lightbox-info">
+            <h3 class="gallery-lightbox-title"></h3>
+            <span class="gallery-lightbox-date"></span>
+            <div class="gallery-lightbox-caption-block">
+                <span class="gallery-lightbox-label">Caption:</span>
+                <p class="gallery-lightbox-caption"></p>
+            </div>
+            <div class="gallery-lightbox-desc-block">
+                <span class="gallery-lightbox-label">About this gallery:</span>
+                <p class="gallery-lightbox-desc"></p>
+            </div>
+            <div class="gallery-lightbox-counter"></div>
+        </div>
+    </div>
+    <button class="gallery-lightbox-nav gallery-next" onclick="galleryNav(1)">&#10095;</button>
+</div>
+
+<script>
+    // Gallery data store for homepage lightbox
+    var galleryData = {};
+    var currentGalleryId = null;
+    var currentImageIndex = 0;
+    var homepageSliderTimers = {};
+
+    <?php foreach ($galleryEvents as $event): ?>
+        <?php $hImages = getGalleryImages($event['id']); ?>
+        galleryData[<?php echo (int)$event['id']; ?>] = {
+            name: <?php echo json_encode($event['event_name']); ?>,
+            date: <?php echo json_encode(formatDate($event['event_date'])); ?>,
+            desc: <?php echo json_encode($event['description']); ?>,
+            images: [
+                <?php foreach ($hImages as $hImg): ?> {
+                        src: <?php echo json_encode(SITE_URL . '/uploads/' . $hImg['image']); ?>,
+                        caption: <?php echo json_encode($hImg['caption']); ?>
+                    },
+                <?php endforeach; ?>
+            ]
+        };
+    <?php endforeach; ?>
+
+    // Hover slider: cycle through the event's images while hovering
+    document.querySelectorAll('.homepage-gallery .gallery-item').forEach(function(item) {
+        var id = item.getAttribute('data-gallery-id');
+        var slider = item.querySelector('.gallery-slider');
+
+        if (slider) {
+            var imgs = slider.querySelectorAll('img');
+            var idx = 0;
+
+            item.addEventListener('mouseenter', function() {
+                slider.style.display = 'flex';
+                idx = 0;
+                showHomeSlide();
+                homepageSliderTimers[id] = setInterval(function() {
+                    idx = (idx + 1) % imgs.length;
+                    showHomeSlide();
+                }, 1200);
+            });
+
+            item.addEventListener('mouseleave', function() {
+                clearInterval(homepageSliderTimers[id]);
+                slider.style.display = 'none';
+            });
+
+            function showHomeSlide() {
+                imgs.forEach(function(img, i) {
+                    img.style.opacity = (i === idx) ? '1' : '0';
+                });
+            }
+        }
+
+        item.addEventListener('click', function() {
+            openHomeGalleryLightbox(id);
+        });
+    });
+
+    function openHomeGalleryLightbox(id) {
+        var data = galleryData[id];
+        if (!data || data.images.length === 0) {
+            var featured = document.querySelector('.homepage-gallery .gallery-item[data-gallery-id="' + id + '"] .gallery-featured');
+            if (featured) {
+                data = {
+                    name: 'Gallery',
+                    date: '',
+                    desc: '',
+                    images: [{ src: featured.src, caption: '' }]
+                };
+            } else {
+                return;
+            }
+        }
+        currentGalleryId = id;
+        currentImageIndex = 0;
+        document.getElementById('galleryLightbox').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        updateHomeLightbox();
+    }
+
+    function closeGalleryLightbox() {
+        document.getElementById('galleryLightbox').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    function galleryNav(direction) {
+        var data = galleryData[currentGalleryId];
+        if (!data) return;
+        currentImageIndex = (currentImageIndex + direction + data.images.length) % data.images.length;
+        updateHomeLightbox();
+    }
+
+    function updateHomeLightbox() {
+        var data = galleryData[currentGalleryId];
+        if (!data || data.images.length === 0) return;
+
+        var img = data.images[currentImageIndex];
+        document.querySelector('.gallery-lightbox-img').src = img.src;
+        document.querySelector('.gallery-lightbox-img').alt = img.caption || data.name;
+        document.querySelector('.gallery-lightbox-title').textContent = data.name;
+        document.querySelector('.gallery-lightbox-date').textContent = data.date;
+        document.querySelector('.gallery-lightbox-caption').textContent = img.caption || '';
+        document.querySelector('.gallery-lightbox-desc').textContent = data.desc || '';
+        document.querySelector('.gallery-lightbox-counter').textContent =
+            (currentImageIndex + 1) + ' / ' + data.images.length;
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        var lightbox = document.getElementById('galleryLightbox');
+        if (lightbox.style.display === 'flex') {
+            if (e.key === 'Escape') closeGalleryLightbox();
+            if (e.key === 'ArrowLeft') galleryNav(-1);
+            if (e.key === 'ArrowRight') galleryNav(1);
+        }
+    });
+
+    // Close on outside click
+    document.getElementById('galleryLightbox') && document.getElementById('galleryLightbox').addEventListener('click', function(e) {
+        if (e.target === this) closeGalleryLightbox();
+    });
+</script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

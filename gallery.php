@@ -86,11 +86,17 @@ include __DIR__ . '/includes/header.php';
         <div class="gallery-lightbox-slider">
             <img src="" alt="Gallery image" class="gallery-lightbox-img">
         </div>
-        <div class="gallery-lightbox-info">
+<div class="gallery-lightbox-info">
             <h3 class="gallery-lightbox-title"></h3>
             <span class="gallery-lightbox-date"></span>
-            <p class="gallery-lightbox-caption"></p>
-            <p class="gallery-lightbox-desc"></p>
+            <div class="gallery-lightbox-caption-block">
+                <span class="gallery-lightbox-label">Caption:</span>
+                <p class="gallery-lightbox-caption"></p>
+            </div>
+            <div class="gallery-lightbox-desc-block">
+                <span class="gallery-lightbox-label">About this gallery:</span>
+                <p class="gallery-lightbox-desc"></p>
+            </div>
             <div class="gallery-lightbox-counter"></div>
         </div>
     </div>

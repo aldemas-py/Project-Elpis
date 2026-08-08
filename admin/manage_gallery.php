@@ -34,45 +34,7 @@ if ($event_name) {
                 $id = (int)$db->lastInsertId();
                 $message = 'Gallery event created successfully.';
             }
-            $messageType = 'success';
-
-            // If images were uploaded with the save form, process them
-            if (isset($_FILES['images']) && is_array($_FILES['images']['name'])) {
-                $files = $_FILES['images'];
-                $nextOrder = count(getGalleryImages($id));
-                for ($i = 0; $i < count($files['name']); $i++) {
-                    if ($files['error'][$i] === UPLOAD_ERR_OK) {
-                        $fileArray = [
-                            'name' => $files['name'][$i],
-                            'type' => $files['type'][$i],
-                            'tmp_name' => $files['tmp_name'][$i],
-                            'error' => $files['error'][$i],
-                            'size' => $files['size'][$i],
-                        ];
-                        try {
-                            $filename = uploadImage($fileArray);
-                            if ($filename) {
-                                $caption = trim($_POST['captions'][$i] ?? '');
-                                $db->prepare("INSERT INTO gallery_images (gallery_event_id, image, caption, display_order) VALUES (?, ?, ?, ?)")
-                                    ->execute([$id, $filename, $caption, $nextOrder]);
-                                $nextOrder++;
-                            }
-                        } catch (Exception $e) {
-                            $message = $e->getMessage();
-                            $messageType = 'error';
-                        }
-                    }
-                }
-                // Set featured image to first upload if none already set
-                $stmt = $db->prepare("SELECT featured_image FROM gallery_events WHERE id = ?");
-                $stmt->execute([$id]);
-                if (!$stmt->fetchColumn()) {
-                    $img = getGalleryImages($id);
-                    if (count($img) > 0) {
-                        $db->prepare("UPDATE gallery_events SET featured_image = ? WHERE id = ?")->execute([$img[0]['image'], $id]);
-                    }
-                }
-            }
+$messageType = 'success';
 
             // Reload the gallery so the image upload section reflects new state
             $editGallery = getGalleryEventById($id);
@@ -82,62 +44,6 @@ if ($event_name) {
         }
     } else {
         $message = 'Event name is required.';
-        $messageType = 'error';
-    }
-}
-
-// Handle image uploads (multiple) + captions
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_images'])) {
-    $gallery_id = (int)$_POST['gallery_id'];
-    $captions = $_POST['captions'] ?? [];
-    $successCount = 0;
-
-    // Get existing images to determine display_order
-    $existing = getGalleryImages($gallery_id);
-    $nextOrder = count($existing);
-
-    if (isset($_FILES['images']) && is_array($_FILES['images']['name'])) {
-        $files = $_FILES['images'];
-        for ($i = 0; $i < count($files['name']); $i++) {
-            if ($files['error'][$i] === UPLOAD_ERR_OK) {
-                $fileArray = [
-                    'name' => $files['name'][$i],
-                    'type' => $files['type'][$i],
-                    'tmp_name' => $files['tmp_name'][$i],
-                    'error' => $files['error'][$i],
-                    'size' => $files['size'][$i],
-                ];
-                try {
-                    $filename = uploadImage($fileArray);
-                    if ($filename) {
-                        $caption = trim($captions[$i] ?? '');
-                        $stmt = $db->prepare("INSERT INTO gallery_images (gallery_event_id, image, caption, display_order) VALUES (?, ?, ?, ?)");
-                        $stmt->execute([$gallery_id, $filename, $caption, $nextOrder]);
-                        $nextOrder++;
-                        $successCount++;
-                    }
-                } catch (Exception $e) {
-                    $message = $e->getMessage();
-                    $messageType = 'error';
-                }
-            }
-        }
-    }
-
-    if ($successCount > 0) {
-        // Set first image as featured if no featured image yet
-        $stmt = $db->prepare("SELECT featured_image FROM gallery_events WHERE id = ?");
-        $stmt->execute([$gallery_id]);
-        if (!$stmt->fetchColumn()) {
-            $img = getGalleryImages($gallery_id);
-            if (count($img) > 0) {
-                $db->prepare("UPDATE gallery_events SET featured_image = ? WHERE id = ?")->execute([$img[0]['image'], $gallery_id]);
-            }
-        }
-        $message = $successCount . ' image(s) uploaded successfully.';
-        $messageType = 'success';
-    } elseif (!$message) {
-        $message = 'No images were uploaded.';
         $messageType = 'error';
     }
 }
@@ -467,7 +373,7 @@ $isAdminPage = true; ?>
 
         <?php if ($editGallery || isset($_GET['new'])): ?>
             <div class="form-container">
-                <form method="POST" action="" enctype="multipart/form-data">
+                <form method="POST" action="">
                     <input type="hidden" name="gallery_id" value="<?php echo $editGallery['id'] ?? 0; ?>">
 
                     <div class="form-row">
@@ -483,19 +389,54 @@ $isAdminPage = true; ?>
                         </div>
                     </div>
 
+                    <!-- Gallery Images: attached to this gallery event (auto-upload with previews) -->
                     <div class="form-group">
-                        <label for="images">Upload Images (Multiple Allowed)</label>
-                        <input type="file" id="images" name="images[]" class="form-control" accept="image/*" multiple
-                            onchange="showCaptionInputs(this)">
-                        <small style="color:#999;">You can select multiple images. JPG, PNG, GIF, WEBP (max 5MB each).
-                            Images are added when you save this gallery.</small>
-                        <div id="captionInputs" style="margin-top:0.75rem;"></div>
+                        <label for="imageInput">Gallery Images</label>
+                        <input type="file" id="imageInput" name="image" class="form-control" accept="image/*"
+                            onchange="uploadImageNow(this)">
+                        <small style="color:#999;">Choose an image and it will upload instantly to this gallery event with
+                            a preview. You can keep adding more images. JPG, PNG, GIF, WEBP (max 5MB each).</small>
+                        <div id="uploadStatus" style="margin-top:0.5rem;font-size:0.85rem;color:#4FA08A;"></div>
+
+<div class="gallery-thumb-grid" id="imagePreviewGrid">
+                            <?php if ($editGallery && $editGallery['id']): ?>
+                                <?php if ($imageList = getGalleryImages($editGallery['id'])): ?>
+                                    <?php $totalImgs = count($imageList); ?>
+                                    <?php foreach ($imageList as $imgIdx => $img): ?>
+                                        <div class="gallery-thumb" data-image-id="<?php echo $img['id']; ?>"
+                                            data-featured="<?php echo ($editGallery['featured_image'] == $img['image']) ? '1' : '0'; ?>">
+                                            <img src="<?php echo SITE_URL; ?>/uploads/<?php echo h($img['image']); ?>"
+                                                alt="<?php echo h($img['caption'] ?: 'Gallery image'); ?>">
+                                            <?php if ($editGallery['featured_image'] == $img['image']): ?>
+                                                <span class="badge">Featured</span>
+                                            <?php endif; ?>
+                                            <div class="actions">
+                                                <a href="javascript:void(0);" title="Set as featured"
+                                                    onclick="setFeatured(<?php echo $img['id']; ?>)">&#9733;</a>
+                                                <span style="color:#fff;font-size:0.7rem;"><?php echo ($img['display_order'] + 1); ?></span>
+                                                <a href="javascript:void(0);" title="Delete image"
+                                                    onclick="deleteImageNow(<?php echo $img['id']; ?>)">&#128465;</a>
+                                            </div>
+                                            <label style="display:block;font-size:0.7rem;font-weight:700;color:#3F5195;padding:0.3rem 0.4rem 0;line-height:1.2;">
+                                                Image <?php echo $imgIdx + 1; ?> of <?php echo $totalImgs; ?> — caption for this image only
+                                            </label>
+                                            <input type="text" class="form-control" style="font-size:0.75rem;border-radius:0;"
+                                                placeholder="Caption for this image..."
+                                                title="Caption that specifically explains this single image"
+                                                value="<?php echo h($img['caption']); ?>"
+                                                onchange="saveCaption(<?php echo $img['id']; ?>, this.value)">
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="description">Brief Description</label>
+<div class="form-group">
+                        <label for="description">Gallery Description <span style="font-weight:400;color:#999;">(explains this whole gallery set of images)</span></label>
                         <textarea id="description" name="description" class="form-control"
-                            rows="3"><?php echo h($editGallery['description'] ?? ''); ?></textarea>
+                            rows="3" placeholder="e.g., A recap of our Youth Mental Health Workshop — showing the full session."><?php echo h($editGallery['description'] ?? ''); ?></textarea>
+                        <small style="color:#999;">This describes the <strong>entire gallery</strong> (all images together), seen in the overlay and lightbox. Use the per-image caption fields above to explain each individual photo.</small>
                     </div>
 
                     <div class="form-group">
@@ -530,51 +471,7 @@ $isAdminPage = true; ?>
                         <button type="submit" name="save_gallery" class="btn btn-primary">Save Gallery Event</button>
                         <a href="<?php echo SITE_URL; ?>/admin/manage_gallery.php" class="btn btn-secondary">Cancel</a>
                     </div>
-                </form>
-
-<?php if ($editGallery && $editGallery['id']): ?>
-                    <hr style="border:none;border-top:1px solid #D7DDD9;margin:2rem 0;">
-
-                    <?php if ($imageList = getGalleryImages($editGallery['id'])): ?>
-                        <div class="gallery-thumb-grid">
-                            <?php foreach ($imageList as $img): ?>
-                                <div class="gallery-thumb">
-                                    <img src="<?php echo SITE_URL; ?>/uploads/<?php echo h($img['image']); ?>"
-                                        alt="<?php echo h($img['caption'] ?: 'Gallery image'); ?>">
-                                    <?php if ($editGallery['featured_image'] == $img['image']): ?>
-                                        <span class="badge">Featured</span>
-                                    <?php endif; ?>
-                                    <div class="actions">
-                                        <a href="?feature=<?php echo $editGallery['id']; ?>&img=<?php echo $img['id']; ?>"
-                                            title="Set as featured">&#9733;</a>
-                                        <span style="color:#fff;font-size:0.7rem;"><?php echo ($img['display_order'] + 1); ?></span>
-                                        <a href="?edit=<?php echo $editGallery['id']; ?>&delete_img=<?php echo $img['id']; ?>&gallery_id=<?php echo $editGallery['id']; ?>"
-                                            title="Delete image"
-                                            onclick="return confirm('Delete this image?')">&#128465;</a>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-
-                        <h4 style="margin:1.5rem 0 0.75rem;">Image Captions & Order</h4>
-                        <form method="POST" action="">
-                            <input type="hidden" name="gallery_id" value="<?php echo $editGallery['id']; ?>">
-                            <?php foreach ($imageList as $i => $img): ?>
-                                <div style="display:flex;gap:1rem;align-items:center;margin-bottom:0.5rem;">
-                                    <input type="hidden" name="caption_id[]" value="<?php echo $img['id']; ?>">
-                                    <input type="number" name="display_order[]" class="form-control"
-                                        style="width:80px;" value="<?php echo $img['display_order']; ?>"
-                                        min="0" title="Display order">
-                                    <input type="text" name="caption_text[]" class="form-control"
-                                        placeholder="Image description..."
-                                        value="<?php echo h($img['caption']); ?>">
-                                </div>
-                            <?php endforeach; ?>
-                            <button type="submit" name="save_captions" class="btn btn-primary btn-sm"
-                                style="margin-top:0.5rem;">Save Captions & Order</button>
-                        </form>
-                    <?php endif; ?>
-                <?php endif; ?>
+</form>
             </div>
         <?php endif; ?>
 
@@ -629,25 +526,175 @@ $isAdminPage = true; ?>
 </div>
 
 <script>
-    function showCaptionInputs(input) {
-        var container = document.getElementById('captionInputs');
-        container.innerHTML = '';
-        var files = input.files || [];
-        for (var i = 0; i < files.length; i++) {
-            var row = document.createElement('div');
-            row.style.cssText = 'display:flex;gap:0.5rem;align-items:center;margin-bottom:0.4rem;';
-            var num = document.createElement('span');
-            num.textContent = (i + 1) + '. ' + files[i].name;
-            num.style.cssText = 'font-size:0.85rem;color:#555;min-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
-            var cap = document.createElement('input');
-            cap.type = 'text';
-            cap.name = 'captions[]';
-            cap.className = 'form-control';
-            cap.placeholder = 'Caption / description for this image (optional)';
-            row.appendChild(num);
-            row.appendChild(cap);
-            container.appendChild(row);
-        }
+    var AJAX_URL = '<?php echo SITE_URL; ?>/admin/gallery_image_ajax.php';
+    var GALLERY_ID = <?php echo (int)($editGallery['id'] ?? 0); ?>;
+
+// Create a new gallery event (draft) so we can attach images to it
+    function createGalleryForUpload() {
+        var fd = new FormData();
+        fd.append('action', 'create');
+        fd.append('event_name', document.getElementById('event_name').value || 'Untitled Gallery');
+        fd.append('event_date', document.getElementById('event_date').value || '');
+
+        return fetch(AJAX_URL, { method: 'POST', body: fd })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    GALLERY_ID = data.id;
+                    var hidden = document.querySelector('input[name="gallery_id"]');
+                    if (hidden) hidden.value = data.id;
+                    return data.id;
+                }
+                throw new Error(data.message || 'Could not create gallery.');
+            });
+    }
+
+    // Upload an image immediately when selected
+    function uploadImageNow(input) {
+        var file = input.files[0];
+        if (!file) return;
+
+        var status = document.getElementById('uploadStatus');
+        status.textContent = 'Uploading...';
+
+        // If we have no gallery yet, create one first (draft) so images attach to it
+        var ready = GALLERY_ID > 0 ? Promise.resolve(GALLERY_ID) : createGalleryForUpload();
+
+        ready.then(function(gid) {
+            var fd = new FormData();
+            fd.append('action', 'upload');
+            fd.append('gallery_id', gid);
+            fd.append('image', file);
+
+            return fetch(AJAX_URL, { method: 'POST', body: fd }).then(function(r) { return r.json(); });
+        }).then(function(data) {
+            if (data.success) {
+                status.textContent = 'Uploaded successfully. You can add another image.';
+                addImagePreview(data);
+            } else {
+                status.textContent = 'Error: ' + (data.message || 'Upload failed.');
+            }
+        }).catch(function(err) {
+            status.textContent = 'Error: ' + (err.message || 'Upload failed.');
+        }).finally(function() {
+            input.value = ''; // clear so user can pick another
+        });
+    }
+
+// Show a newly uploaded image as a small preview
+    function addImagePreview(data) {
+        var grid = document.getElementById('imagePreviewGrid');
+
+        var thumb = document.createElement('div');
+        thumb.className = 'gallery-thumb';
+        thumb.setAttribute('data-image-id', data.id);
+        thumb.setAttribute('data-featured', '0');
+
+        var img = document.createElement('img');
+        img.src = data.url;
+        img.alt = 'Uploaded image';
+
+        var actions = document.createElement('div');
+        actions.className = 'actions';
+
+        var star = document.createElement('a');
+        star.href = 'javascript:void(0);';
+        star.title = 'Set as featured';
+        star.innerHTML = '&#9733;';
+        star.onclick = function() { setFeatured(data.id); };
+
+        var num = document.createElement('span');
+        num.style.cssText = 'color:#fff;font-size:0.7rem;';
+        num.textContent = data.display_order;
+
+        var del = document.createElement('a');
+        del.href = 'javascript:void(0);';
+        del.title = 'Delete image';
+        del.innerHTML = '&#128465;';
+        del.onclick = function() { deleteImageNow(data.id); };
+
+        actions.appendChild(star);
+        actions.appendChild(num);
+        actions.appendChild(del);
+
+        // Count how many thumbnails are present to label this image's position
+        var totalNow = grid.querySelectorAll('.gallery-thumb').length + 1;
+
+        var capLabel = document.createElement('label');
+        capLabel.style.cssText = 'display:block;font-size:0.7rem;font-weight:700;color:#3F5195;padding:0.3rem 0.4rem 0;line-height:1.2;';
+        capLabel.textContent = 'Image ' + totalNow + ' of ' + totalNow + ' — caption for this image only';
+
+        var cap = document.createElement('input');
+        cap.type = 'text';
+        cap.className = 'form-control';
+        cap.style.cssText = 'font-size:0.75rem;border-radius:0;';
+        cap.placeholder = 'Caption for this image...';
+        cap.title = 'Caption that specifically explains this single image';
+        cap.onchange = function() { saveCaption(data.id, this.value); };
+
+        thumb.appendChild(img);
+        thumb.appendChild(actions);
+        thumb.appendChild(capLabel);
+        thumb.appendChild(cap);
+        grid.appendChild(thumb);
+    }
+
+    // Save a caption via AJAX
+    function saveCaption(imageId, caption) {
+        var fd = new FormData();
+        fd.append('action', 'caption');
+        fd.append('image_id', imageId);
+        fd.append('caption', caption);
+        fetch(AJAX_URL, { method: 'POST', body: fd });
+    }
+
+    // Set an image as featured via AJAX
+    function setFeatured(imageId) {
+        if (!confirm('Set this image as the featured image?')) return;
+        var fd = new FormData();
+        fd.append('action', 'feature');
+        fd.append('image_id', imageId);
+        fd.append('gallery_id', GALLERY_ID);
+        fetch(AJAX_URL, { method: 'POST', body: fd })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    // Move the badge to the selected image
+                    var thumbs = document.querySelectorAll('#imagePreviewGrid .gallery-thumb');
+                    thumbs.forEach(function(t) {
+                        t.querySelector('.badge') ? t.querySelector('.badge').remove() : null;
+                        t.setAttribute('data-featured', '0');
+                        if (parseInt(t.getAttribute('data-image-id')) === imageId) {
+                            t.setAttribute('data-featured', '1');
+                            var rank = document.createElement('span');
+                            rank.className = 'badge';
+                            rank.textContent = 'Featured';
+                            t.insertBefore(rank, t.firstChild);
+                        }
+                    });
+                } else {
+                    alert('Error: ' + (data.message || 'Could not set featured.'));
+                }
+            });
+    }
+
+    // Delete an image via AJAX
+    function deleteImageNow(imageId) {
+        if (!confirm('Delete this image?')) return;
+        var fd = new FormData();
+        fd.append('action', 'delete');
+        fd.append('image_id', imageId);
+        fd.append('gallery_id', GALLERY_ID);
+        fetch(AJAX_URL, { method: 'POST', body: fd })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    var thumb = document.querySelector('#imagePreviewGrid .gallery-thumb[data-image-id="' + imageId + '"]');
+                    if (thumb) thumb.remove();
+                } else {
+                    alert('Error: ' + (data.message || 'Could not delete image.'));
+                }
+            });
     }
 </script>
 

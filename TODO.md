@@ -17,4 +17,10 @@
 - [x] Lint check `manage_gallery.php` and `gallery.php`
 - [x] Fix: Upload images form now appears immediately after creating a new gallery event
 - [x] Improve: Image upload field moved into the main gallery save form (always visible), with per-image caption inputs and auto-assignment of featured image
+- [x] Enhance: Auto-upload a single chosen image via AJAX with a small preview, clear the input to allow adding more, and provide caption editing for every image (new `admin/gallery_image_ajax.php` endpoint)
+- [x] Integrate: Gallery images are now managed inside the gallery event form itself (upload field + previews above Brief Description), not as a separate/standalone section
+- [x] Allow adding images without saving first: on first upload for a new gallery, the gallery event is auto-created as a draft via AJAX, then the image attaches to it
+- [x] Add gallery section to homepage (`index.php`) with masonry grid, hover image slider, and lightbox (keyboard nav + click to view)
+- [x] Clarify caption vs description in admin gallery form: per-image caption inputs now labeled "Image N of M — caption for this image only", and the Brief Description field relabeled to "Gallery Description (explains this whole gallery set)" with helper text
+- [x] Contact info update: WhatsApp group link, phone (0718674888/0708854435), email (elpiscounselling24@gmail.com), and location (Krishna Centre Building, 2nd Floor, Suite D-16, Westlands) applied across contact.php, footer.php, booking.php, and ADMIN_EMAIL in config.php
 
