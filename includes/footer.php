@@ -55,7 +55,7 @@
                 <ul class="footer-contact">
                     <li>
                         <span class="icon">&#9906;</span>
-                        <span>Krishna Centre Building, 2nd Floor (Suite D-16)<br>Westlands, Nairobi</span>
+<span>Krishna Centre Building, 2nd Floor (Suite D-16)<br>Along Woodvale Groove Street, Westlands, Nairobi</span>
                     </li>
                     <li>
                         <span class="icon">&#9742;</span>
@@ -73,9 +73,14 @@
             </div>
         </div>
 
-        <div class="footer-bottom">
+<div class="footer-bottom">
             <span>&copy; <?php echo date('Y'); ?> <?php echo SITE_NAME; ?>. All rights reserved.</span>
             <span>Registered Mental Health & Psychosocial Support Organization</span>
+        </div>
+
+        <div class="footer-designed">
+            Designed by
+            <a href="https://njengasam.com/about.php" target="_blank" rel="noopener">Njenga Sam</a>
         </div>
     </div>
 </footer>

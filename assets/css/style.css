@@ -1011,6 +1011,25 @@ select.form-control {
     font-size: 0.85rem;
 }
 
+.footer-designed {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1rem 0 2rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.footer-designed a {
+    color: #E76F51;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.footer-designed a:hover {
+    color: #4FA08A;
+    text-decoration: underline;
+}
+
 .social-links {
     display: flex;
     gap: 1rem;

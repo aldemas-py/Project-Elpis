@@ -314,18 +314,60 @@ table td {
         </div>
 
         <!-- Therapy Room Availability Toggle -->
-        <div class="table-container" style="margin-bottom:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+        <div class="table-container" style="margin-bottom:2rem;">
             <div>
                 <h3 style="margin-bottom:0.3rem;">&#128719; Therapy Room Booking Availability</h3>
-                <p style="color:#999;font-size:0.85rem;">Control whether visitors can see the therapy room booking calendar on the public site.</p>
+                <p style="color:#999;font-size:0.85rem;margin-bottom:1.5rem;">Control which therapy rooms visitors can see and book on the public site.</p>
             </div>
-            <form method="POST">
-                <input type="hidden" name="toggle_therapy_visible" value="1">
-                <button type="submit" class="btn <?php echo $therapyVisible ? 'btn-approve' : 'btn-secondary'; ?>"
-                    style="<?php echo $therapyVisible ? '' : 'border:2px solid #E76F51;color:#E76F51;'; ?>">
-                    <?php echo $therapyVisible ? '&#10004; Visible — Click to Hide' : '&#10008; Hidden — Click to Show'; ?>
-                </button>
-            </form>
+
+            <!-- Overall availability toggle -->
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;padding-bottom:1.25rem;border-bottom:1px solid #EAF4F1;margin-bottom:1.25rem;">
+                <div>
+                    <strong>Therapy Room Booking (Overall)</strong>
+                    <p style="color:#999;font-size:0.85rem;margin-top:0.2rem;">Master switch — hides/disables the entire therapy room booking module.</p>
+                </div>
+                <form method="POST">
+                    <input type="hidden" name="toggle_therapy_visible" value="1">
+                    <button type="submit" class="btn <?php echo $therapyVisible ? 'btn-approve' : 'btn-secondary'; ?>"
+                        style="<?php echo $therapyVisible ? '' : 'border:2px solid #E76F51;color:#E76F51;'; ?>">
+                        <?php echo $therapyVisible ? '&#10004; Enabled — Click to Disable' : '&#10008; Disabled — Click to Enable'; ?>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Room 1 toggle -->
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;padding-bottom:1.25rem;border-bottom:1px solid #EAF4F1;margin-bottom:1.25rem;">
+                <div>
+                    <strong>Therapy Room 1</strong>
+                    <p style="color:#999;font-size:0.85rem;margin-top:0.2rem;">Independent toggle for Room 1 visibility.</p>
+                </div>
+                <form method="POST">
+                    <input type="hidden" name="toggle_room_visible" value="1">
+                    <input type="hidden" name="room_key" value="therapy_room_1_visible">
+                    <button type="submit" class="btn <?php echo $room1Visible ? 'btn-approve' : 'btn-secondary'; ?>"
+                        style="<?php echo $room1Visible ? '' : 'border:2px solid #E76F51;color:#E76F51;'; ?>">
+                        <?php echo $room1Visible ? '&#10004; Visible — Click to Hide' : '&#10008; Hidden — Click to Show'; ?>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Room 2 toggle -->
+            <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+                    <div>
+                        <strong>Therapy Room 2</strong>
+                        <p style="color:#999;font-size:0.85rem;margin-top:0.2rem;">Independent toggle for Room 2 visibility.</p>
+                    </div>
+                    <form method="POST">
+                        <input type="hidden" name="toggle_room_visible" value="1">
+                        <input type="hidden" name="room_key" value="therapy_room_2_visible">
+                        <button type="submit" class="btn <?php echo $room2Visible ? 'btn-approve' : 'btn-secondary'; ?>"
+                            style="<?php echo $room2Visible ? '' : 'border:2px solid #E76F51;color:#E76F51;'; ?>">
+                            <?php echo $room2Visible ? '&#10004; Visible — Click to Hide' : '&#10008; Hidden — Click to Show'; ?>
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <div class="table-container">

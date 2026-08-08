@@ -449,8 +449,8 @@ include __DIR__ . '/includes/header.php';
                         <div style="display:flex;gap:1rem;align-items:flex-start;">
                             <span style="color:#4FA08A;font-size:1.3rem;">&#9906;</span>
                             <div>
-                                <strong>Visit Us</strong>
-                                <p style="color:#666;font-size:0.9rem;">Krishna Centre Building, 2nd Floor (Suite D-16), Westlands, Nairobi</p>
+<strong>Visit Us</strong>
+                                <p style="color:#666;font-size:0.9rem;">Krishna Centre Building, 2nd Floor (Suite D-16), Along Woodvale Groove Street, Westlands, Nairobi</p>
                             </div>
                         </div>
                     </div>
@@ -660,7 +660,7 @@ include __DIR__ . '/includes/header.php';
 $approvedBookings = getApprovedTherapyBookings();
 $roomBlockedSlots = [];
 foreach ($approvedBookings as $bk) {
-    $broom = $bk['room'] ?: 'Therapy Room 1';
+    $broom = $bk['room'] ?? 'Therapy Room 1';
     $roomBlockedSlots[$broom][$bk['booking_date']][] = [
         'start' => $bk['start_time'],
         'end' => $bk['end_time']

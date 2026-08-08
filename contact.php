@@ -64,8 +64,8 @@ include __DIR__ . '/includes/header.php';
                 <div style="margin-top:2.5rem;">
                     <div class="info-card" style="margin-bottom:1rem;">
                         <div class="info-card-icon">&#9906;</div>
-                        <h4>Visit Us</h4>
-                        <p>Krishna Centre Building, 2nd Floor (Suite D-16)<br>Westlands, Nairobi</p>
+<h4>Visit Us</h4>
+                        <p>Krishna Centre Building, 2nd Floor (Suite D-16)<br>Along Woodvale Groove Street, Westlands, Nairobi</p>
                     </div>
 
                     <div class="info-card" style="margin-bottom:1rem;">
@@ -159,8 +159,8 @@ include __DIR__ . '/includes/header.php';
     <div class="container">
         <div class="section-header">
             <p class="section-subtitle">Find Us</p>
-            <h2>Visit Our Westlands Clinic</h2>
-            <p>Krishna Centre, 2nd Floor — conveniently located in Nairobi's premier business district</p>
+<h2>Visit Our Westlands Clinic</h2>
+            <p>Krishna Centre, 2nd Floor (Suite D-16) — Along Woodvale Groove Street, Westlands, Nairobi</p>
         </div>
 
         <div class="map-container">
