@@ -37,22 +37,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_service'])) {
     }
 }
 
-// Handle Toggle Active
-if (isset($_GET['toggle'])) {
-    $id = (int)$_GET['toggle'];
-    $stmt = $db->prepare("UPDATE services SET is_active = NOT is_active WHERE id = ?");
-    $stmt->execute([$id]);
-    $message = 'Service status toggled.';
-    $messageType = 'success';
+// Handle Toggle Active via POST (CSRF protected)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_service'])) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = 'Security token mismatch. Please refresh and try again.';
+        $messageType = 'error';
+    } else {
+        $id = (int)$_POST['service_id'];
+        $stmt = $db->prepare("UPDATE services SET is_active = NOT is_active WHERE id = ?");
+        $stmt->execute([$id]);
+        $message = 'Service status toggled.';
+        $messageType = 'success';
+    }
 }
 
-// Handle Delete
-if (isset($_GET['delete'])) {
-    $id = (int)$_GET['delete'];
-    $stmt = $db->prepare("DELETE FROM services WHERE id = ?");
-    $stmt->execute([$id]);
-    $message = 'Service deleted successfully.';
-    $messageType = 'success';
+// Handle Delete via POST (CSRF protected)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_service'])) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = 'Security token mismatch. Please refresh and try again.';
+        $messageType = 'error';
+    } else {
+        $id = (int)$_POST['service_id'];
+        $stmt = $db->prepare("DELETE FROM services WHERE id = ?");
+        $stmt->execute([$id]);
+        $message = 'Service deleted successfully.';
+        $messageType = 'success';
+    }
 }
 
 // Get edit data
@@ -326,16 +336,24 @@ $isAdminPage = true; ?>
                                 <td>
                                     <?php echo $service['is_active'] ? '<span style="color:#4FA08A;">Active</span>' : '<span style="color:#999;">Inactive</span>'; ?>
                                 </td>
-                                <td>
-                                    <a href="?toggle=<?php echo $service['id']; ?>" class="btn btn-sm btn-toggle"
-                                        style="padding:0.3rem 0.8rem;font-size:0.8rem;">
-                                        <?php echo $service['is_active'] ? 'Deactivate' : 'Activate'; ?>
-                                    </a>
+<td>
+                                    <form method="POST" style="display:inline-block;">
+                                        <?php echo csrfField(); ?>
+                                        <input type="hidden" name="service_id" value="<?php echo $service['id']; ?>">
+                                        <button type="submit" name="toggle_service" class="btn btn-sm btn-toggle"
+                                            style="padding:0.3rem 0.8rem;font-size:0.8rem;">
+                                            <?php echo $service['is_active'] ? 'Deactivate' : 'Activate'; ?>
+                                        </button>
+                                    </form>
                                     <a href="?edit=<?php echo $service['id']; ?>" class="btn btn-sm btn-primary"
                                         style="padding:0.3rem 0.8rem;font-size:0.8rem;">Edit</a>
-                                    <a href="?delete=<?php echo $service['id']; ?>" class="btn btn-sm btn-danger"
-                                        style="padding:0.3rem 0.8rem;font-size:0.8rem;"
-                                        onclick="return confirm('Delete this service?')">Delete</a>
+                                    <form method="POST" style="display:inline-block;"
+                                        onsubmit="return confirm('Delete this service?')">
+                                        <?php echo csrfField(); ?>
+                                        <input type="hidden" name="service_id" value="<?php echo $service['id']; ?>">
+                                        <button type="submit" name="delete_service" class="btn btn-sm btn-danger"
+                                            style="padding:0.3rem 0.8rem;font-size:0.8rem;">Delete</button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

@@ -21,5 +21,10 @@ Thumbs.db
 *.log
 task.txt
 
+# Environment / secrets (never commit real credentials)
+.env
+.env.*
+!.env.example
+
 # Application storage (runtime logs, cached data, etc.)
 storage/

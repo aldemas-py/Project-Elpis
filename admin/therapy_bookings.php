@@ -13,45 +13,60 @@ $messageType = 'success';
 
 // Handle status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
-    $bookingId = (int)$_POST['booking_id'];
-    $status = $_POST['status'];
-    if (in_array($status, ['pending', 'approved', 'cancelled'])) {
-        $stmt = $db->prepare("UPDATE therapy_room_bookings SET status = ? WHERE id = ?");
-        $stmt->execute([$status, $bookingId]);
-        $message = 'Booking status updated successfully.';
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = 'Security token mismatch. Please refresh and try again.';
+        $messageType = 'error';
+    } else {
+        $bookingId = (int)$_POST['booking_id'];
+        $status = $_POST['status'];
+        if (in_array($status, ['pending', 'approved', 'cancelled'], true)) {
+            $stmt = $db->prepare("UPDATE therapy_room_bookings SET status = ? WHERE id = ?");
+            $stmt->execute([$status, $bookingId]);
+            $message = 'Booking status updated successfully.';
+        }
     }
 }
 
 // Handle manual scheduling
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_booking'])) {
-    $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
-    $booking_date = trim($_POST['booking_date'] ?? '');
-    $start_time = trim($_POST['start_time'] ?? '');
-    $hours = (int)($_POST['hours'] ?? 1);
-    $hourlyRate = 500;
-    $amount = $hourlyRate * $hours;
-    $startTimestamp = strtotime($start_time);
-    $endTime = date('H:i', $startTimestamp + ($hours * 3600));
-
-    if ($name && $email && $phone && $booking_date && $start_time) {
-        $stmt = $db->prepare("INSERT INTO therapy_room_bookings
-            (name, email, phone, booking_date, start_time, end_time, hours, amount, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'approved')");
-        $stmt->execute([$name, $email, $phone, $booking_date, $start_time, $endTime, $hours, $amount]);
-        $message = 'Therapy room booking scheduled and approved successfully.';
-    } else {
-        $message = 'Please fill in all required fields.';
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = 'Security token mismatch. Please refresh and try again.';
         $messageType = 'error';
+    } else {
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $booking_date = trim($_POST['booking_date'] ?? '');
+        $start_time = trim($_POST['start_time'] ?? '');
+        $hours = (int)($_POST['hours'] ?? 1);
+        $hourlyRate = 500;
+        $amount = $hourlyRate * $hours;
+        $startTimestamp = strtotime($start_time);
+        $endTime = date('H:i', $startTimestamp + ($hours * 3600));
+
+        if ($name && $email && $phone && $booking_date && $start_time) {
+            $stmt = $db->prepare("INSERT INTO therapy_room_bookings
+                (name, email, phone, booking_date, start_time, end_time, hours, amount, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'approved')");
+            $stmt->execute([$name, $email, $phone, $booking_date, $start_time, $endTime, $hours, $amount]);
+            $message = 'Therapy room booking scheduled and approved successfully.';
+        } else {
+            $message = 'Please fill in all required fields.';
+            $messageType = 'error';
+        }
     }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_booking'])) {
-    $bookingId = (int)$_POST['booking_id'];
-    $stmt = $db->prepare("DELETE FROM therapy_room_bookings WHERE id = ?");
-    $stmt->execute([$bookingId]);
-    $message = 'Booking deleted successfully.';
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = 'Security token mismatch. Please refresh and try again.';
+        $messageType = 'error';
+    } else {
+        $bookingId = (int)$_POST['booking_id'];
+        $stmt = $db->prepare("DELETE FROM therapy_room_bookings WHERE id = ?");
+        $stmt->execute([$bookingId]);
+        $message = 'Booking deleted successfully.';
+    }
 }
 
 $bookings = $db->query("SELECT * FROM therapy_room_bookings ORDER BY booking_date DESC, start_time DESC")->fetchAll();
@@ -335,7 +350,8 @@ table tbody tr:hover {
         <!-- Schedule Manually -->
         <div class="card">
             <h3>&#128203; Schedule a Booking Manually</h3>
-            <form method="POST" action="">
+<form method="POST" action="">
+                <?php echo csrfField(); ?>
                 <input type="hidden" name="add_booking" value="1">
                 <div class="form-row">
                     <div class="form-group">
@@ -409,7 +425,8 @@ table tbody tr:hover {
                         </td>
                         <td>
                             <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-                                <form method="POST" style="display:inline;">
+<form method="POST" style="display:inline;">
+                                    <?php echo csrfField(); ?>
                                     <input type="hidden" name="booking_id" value="<?php echo $bk['id']; ?>">
                                     <select name="status" onchange="this.form.submit()" class="status-select">
                                         <option value="pending"
@@ -421,8 +438,9 @@ table tbody tr:hover {
                                     </select>
                                     <input type="hidden" name="update_status" value="1">
                                 </form>
-                                <form method="POST" style="display:inline;"
+<form method="POST" style="display:inline;"
                                     onsubmit="return confirm('Delete this booking?');">
+                                    <?php echo csrfField(); ?>
                                     <input type="hidden" name="booking_id" value="<?php echo $bk['id']; ?>">
                                     <input type="hidden" name="delete_booking" value="1">
                                     <button type="submit" class="btn-sm btn-danger-sm">Delete</button>

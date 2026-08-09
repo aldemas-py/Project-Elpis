@@ -100,17 +100,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_captions'])) {
     $messageType = 'success';
 }
 
-// Handle Delete Gallery Event
-if (isset($_GET['delete'])) {
-    $galleryId = (int)$_GET['delete'];
-    // Delete all images
-    $images = getGalleryImages($galleryId);
-    foreach ($images as $img) {
-        deleteImage($img['image']);
+// Handle Delete Gallery Event via POST (CSRF protected)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_gallery'])) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = 'Security token mismatch. Please refresh and try again.';
+        $messageType = 'error';
+    } else {
+        $galleryId = (int)$_POST['gallery_id'];
+        // Delete all images
+        $images = getGalleryImages($galleryId);
+        foreach ($images as $img) {
+            deleteImage($img['image']);
+        }
+        $db->prepare("DELETE FROM gallery_events WHERE id = ?")->execute([$galleryId]);
+        $message = 'Gallery event deleted successfully.';
+        $messageType = 'success';
     }
-    $db->prepare("DELETE FROM gallery_events WHERE id = ?")->execute([$galleryId]);
-    $message = 'Gallery event deleted successfully.';
-    $messageType = 'success';
 }
 
 // Get edit data (preserve $editGallery if already set by a save operation above)
@@ -507,12 +512,16 @@ $isAdminPage = true; ?>
                                 <td><?php echo $imgCount; ?></td>
                                 <td><?php echo $g['is_published'] ? '<span style="color:#4FA08A;">Published</span>' : '<span style="color:#999;">Hidden</span>'; ?>
                                 </td>
-                                <td>
+<td>
                                     <a href="?edit=<?php echo $g['id']; ?>" class="btn btn-sm btn-primary"
                                         style="padding:0.3rem 0.8rem;font-size:0.8rem;">Manage</a>
-                                    <a href="?delete=<?php echo $g['id']; ?>" class="btn btn-sm btn-danger"
-                                        style="padding:0.3rem 0.8rem;font-size:0.8rem;"
-                                        onclick="return confirm('Delete this gallery and all its images?')">Delete</a>
+                                    <form method="POST" style="display:inline-block;"
+                                        onsubmit="return confirm('Delete this gallery and all its images?')">
+                                        <?php echo csrfField(); ?>
+                                        <input type="hidden" name="gallery_id" value="<?php echo $g['id']; ?>">
+                                        <button type="submit" name="delete_gallery" class="btn btn-sm btn-danger"
+                                            style="padding:0.3rem 0.8rem;font-size:0.8rem;">Delete</button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

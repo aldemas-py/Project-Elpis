@@ -11,11 +11,19 @@ $db = getDB();
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
-    $appt_id = (int)$_POST['appointment_id'];
-    $status = $_POST['status'];
-    $stmt = $db->prepare("UPDATE appointments SET status = ? WHERE id = ?");
-    $stmt->execute([$status, $appt_id]);
-    $message = 'Appointment status updated successfully.';
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = 'Security token mismatch. Please refresh and try again.';
+    } else {
+        $appt_id = (int)$_POST['appointment_id'];
+        $status = $_POST['status'];
+        $allowed = ['pending', 'contacted', 'completed', 'cancelled'];
+        if (!in_array($status, $allowed, true)) {
+            $status = 'pending';
+        }
+        $stmt = $db->prepare("UPDATE appointments SET status = ? WHERE id = ?");
+        $stmt->execute([$status, $appt_id]);
+        $message = 'Appointment status updated successfully.';
+    }
 }
 
 $appointments = $db->query("SELECT * FROM appointments ORDER BY created_at DESC")->fetchAll();
@@ -285,7 +293,8 @@ table tbody tr:hover {
                                 class="status-badge status-<?php echo $appt['status']; ?>"><?php echo ucfirst($appt['status']); ?></span>
                         </td>
                         <td>
-                            <form method="POST" style="display:inline;">
+<form method="POST" style="display:inline;">
+                                <?php echo csrfField(); ?>
                                 <input type="hidden" name="appointment_id" value="<?php echo $appt['id']; ?>">
                                 <select name="status" onchange="this.form.submit()" class="status-select">
                                     <option value="pending"

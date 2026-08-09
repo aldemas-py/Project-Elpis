@@ -54,17 +54,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_article'])) {
     }
 }
 
-// Handle Delete
-if (isset($_GET['delete'])) {
-    $id = (int)$_GET['delete'];
-    $stmt = $db->prepare("SELECT image FROM articles WHERE id = ?");
-    $stmt->execute([$id]);
-    $img = $stmt->fetchColumn();
-    if ($img) deleteImage($img);
-    $stmt = $db->prepare("DELETE FROM articles WHERE id = ?");
-    $stmt->execute([$id]);
-    $message = 'Article deleted successfully.';
-    $messageType = 'success';
+// Handle Delete via POST (CSRF protected)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_article'])) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = 'Security token mismatch. Please refresh and try again.';
+        $messageType = 'error';
+    } else {
+        $id = (int)$_POST['article_id'];
+        $stmt = $db->prepare("SELECT image FROM articles WHERE id = ?");
+        $stmt->execute([$id]);
+        $img = $stmt->fetchColumn();
+        if ($img) deleteImage($img);
+        $stmt = $db->prepare("DELETE FROM articles WHERE id = ?");
+        $stmt->execute([$id]);
+        $message = 'Article deleted successfully.';
+        $messageType = 'success';
+    }
 }
 
 // Get edit data
@@ -376,12 +381,16 @@ $isAdminPage = true; ?>
                                 <td><?php echo $article['is_published'] ? '<span style="color:#4FA08A;">Published</span>' : '<span style="color:#999;">Draft</span>'; ?>
                                 </td>
                                 <td><small><?php echo formatDate($article['created_at']); ?></small></td>
-                                <td>
+<td>
                                     <a href="?edit=<?php echo $article['id']; ?>" class="btn btn-sm btn-primary"
                                         style="padding:0.3rem 0.8rem;font-size:0.8rem;">Edit</a>
-                                    <a href="?delete=<?php echo $article['id']; ?>" class="btn btn-sm btn-danger"
-                                        style="padding:0.3rem 0.8rem;font-size:0.8rem;"
-                                        onclick="return confirm('Delete this article?')">Delete</a>
+                                    <form method="POST" style="display:inline-block;"
+                                        onsubmit="return confirm('Delete this article?')">
+                                        <?php echo csrfField(); ?>
+                                        <input type="hidden" name="article_id" value="<?php echo $article['id']; ?>">
+                                        <button type="submit" name="delete_article" class="btn btn-sm btn-danger"
+                                            style="padding:0.3rem 0.8rem;font-size:0.8rem;">Delete</button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

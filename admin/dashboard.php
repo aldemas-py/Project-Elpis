@@ -14,22 +14,26 @@ $recentAppointments = $db->query("SELECT * FROM appointments ORDER BY created_at
 
 // Handle therapy room overall visibility toggle
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_therapy_visible'])) {
-    $current = isTherapyRoomVisible();
-    setSetting('therapy_room_visible', $current ? '0' : '1');
-    header('Location: ' . SITE_URL . '/admin/dashboard.php?toggled=1');
-    exit;
+    if (verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $current = isTherapyRoomVisible();
+        setSetting('therapy_room_visible', $current ? '0' : '1');
+        header('Location: ' . SITE_URL . '/admin/dashboard.php?toggled=1');
+        exit;
+    }
 }
 
 // Handle per-room visibility toggle
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_room_visible'])) {
-    $roomKey = $_POST['room_key'] ?? '';
-    $roomKeys = ['therapy_room_1_visible', 'therapy_room_2_visible'];
-    if (in_array($roomKey, $roomKeys)) {
-        $current = getSetting($roomKey, '1') == '1';
-        setSetting($roomKey, $current ? '0' : '1');
+    if (verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $roomKey = $_POST['room_key'] ?? '';
+        $roomKeys = ['therapy_room_1_visible', 'therapy_room_2_visible'];
+        if (in_array($roomKey, $roomKeys)) {
+            $current = getSetting($roomKey, '1') == '1';
+            setSetting($roomKey, $current ? '0' : '1');
+        }
+        header('Location: ' . SITE_URL . '/admin/dashboard.php?toggled=1');
+        exit;
     }
-    header('Location: ' . SITE_URL . '/admin/dashboard.php?toggled=1');
-    exit;
 }
 
 $therapyVisible = isTherapyRoomVisible();
@@ -328,6 +332,7 @@ table td {
                     <p style="color:#999;font-size:0.85rem;margin-top:0.2rem;">Master switch — hides/disables the entire therapy room booking module.</p>
                 </div>
                 <form method="POST">
+                    <?php echo csrfField(); ?>
                     <input type="hidden" name="toggle_therapy_visible" value="1">
                     <button type="submit" class="btn <?php echo $therapyVisible ? 'btn-approve' : 'btn-secondary'; ?>"
                         style="<?php echo $therapyVisible ? '' : 'border:2px solid #E76F51;color:#E76F51;'; ?>">
@@ -343,6 +348,7 @@ table td {
                     <p style="color:#999;font-size:0.85rem;margin-top:0.2rem;">Independent toggle for Room 1 visibility.</p>
                 </div>
                 <form method="POST">
+                    <?php echo csrfField(); ?>
                     <input type="hidden" name="toggle_room_visible" value="1">
                     <input type="hidden" name="room_key" value="therapy_room_1_visible">
                     <button type="submit" class="btn <?php echo $room1Visible ? 'btn-approve' : 'btn-secondary'; ?>"
@@ -360,6 +366,7 @@ table td {
                         <p style="color:#999;font-size:0.85rem;margin-top:0.2rem;">Independent toggle for Room 2 visibility.</p>
                     </div>
                     <form method="POST">
+                        <?php echo csrfField(); ?>
                         <input type="hidden" name="toggle_room_visible" value="1">
                         <input type="hidden" name="room_key" value="therapy_room_2_visible">
                         <button type="submit" class="btn <?php echo $room2Visible ? 'btn-approve' : 'btn-secondary'; ?>"

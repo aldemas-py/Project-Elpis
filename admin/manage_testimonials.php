@@ -36,20 +36,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_testimonial'])) 
     }
 }
 
-if (isset($_GET['delete'])) {
-    $id = (int)$_GET['delete'];
-    $stmt = $db->prepare("DELETE FROM testimonials WHERE id = ?");
-    $stmt->execute([$id]);
-    $message = 'Testimonial deleted successfully.';
-    $messageType = 'success';
+// Handle Delete via POST (CSRF protected)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_testimonial'])) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = 'Security token mismatch. Please refresh and try again.';
+        $messageType = 'error';
+    } else {
+        $id = (int)$_POST['testimonial_id'];
+        $stmt = $db->prepare("DELETE FROM testimonials WHERE id = ?");
+        $stmt->execute([$id]);
+        $message = 'Testimonial deleted successfully.';
+        $messageType = 'success';
+    }
 }
 
-if (isset($_GET['toggle'])) {
-    $id = (int)$_GET['toggle'];
-    $stmt = $db->prepare("UPDATE testimonials SET is_approved = NOT is_approved WHERE id = ?");
-    $stmt->execute([$id]);
-    $message = 'Testimonial approval status toggled.';
-    $messageType = 'success';
+// Handle Toggle via POST (CSRF protected)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_testimonial'])) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = 'Security token mismatch. Please refresh and try again.';
+        $messageType = 'error';
+    } else {
+        $id = (int)$_POST['testimonial_id'];
+        $stmt = $db->prepare("UPDATE testimonials SET is_approved = NOT is_approved WHERE id = ?");
+        $stmt->execute([$id]);
+        $message = 'Testimonial approval status toggled.';
+        $messageType = 'success';
+    }
 }
 
 $editTestimonial = null;
@@ -326,14 +338,22 @@ $isAdminPage = true;
                                 <td><?php echo $testimonial['is_approved'] ? '<span style="color:#4FA08A;">Approved</span>' : '<span style="color:#999;">Pending</span>'; ?>
                                 </td>
                                 <td><small><?php echo formatDate($testimonial['created_at']); ?></small></td>
-                                <td>
-                                    <a href="?toggle=<?php echo $testimonial['id']; ?>"
-                                        style="display:inline-block;padding:0.3rem 0.8rem;background:#4FA08A;color:#fff;border-radius:5px;font-size:0.8rem;text-decoration:none;"><?php echo $testimonial['is_approved'] ? 'Unapprove' : 'Approve'; ?></a>
+<td>
+                                    <form method="POST" style="display:inline-block;">
+                                        <?php echo csrfField(); ?>
+                                        <input type="hidden" name="testimonial_id" value="<?php echo $testimonial['id']; ?>">
+                                        <button type="submit" name="toggle_testimonial"
+                                            style="display:inline-block;padding:0.3rem 0.8rem;background:#4FA08A;color:#fff;border-radius:5px;font-size:0.8rem;text-decoration:none;border:none;cursor:pointer;"><?php echo $testimonial['is_approved'] ? 'Unapprove' : 'Approve'; ?></button>
+                                    </form>
                                     <a href="?edit=<?php echo $testimonial['id']; ?>"
                                         style="display:inline-block;padding:0.3rem 0.8rem;background:#3F5195;color:#fff;border-radius:5px;font-size:0.8rem;text-decoration:none;">Edit</a>
-                                    <a href="?delete=<?php echo $testimonial['id']; ?>"
-                                        style="display:inline-block;padding:0.3rem 0.8rem;background:#dc3545;color:#fff;border-radius:5px;font-size:0.8rem;text-decoration:none;"
-                                        onclick="return confirm('Delete this testimonial?')">Delete</a>
+                                    <form method="POST" style="display:inline-block;"
+                                        onsubmit="return confirm('Delete this testimonial?')">
+                                        <?php echo csrfField(); ?>
+                                        <input type="hidden" name="testimonial_id" value="<?php echo $testimonial['id']; ?>">
+                                        <button type="submit" name="delete_testimonial"
+                                            style="display:inline-block;padding:0.3rem 0.8rem;background:#dc3545;color:#fff;border-radius:5px;font-size:0.8rem;text-decoration:none;border:none;cursor:pointer;">Delete</button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

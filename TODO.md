@@ -1,16 +1,18 @@
-# Elpis Counselling Centre - SMTP Email Fix & Admin Settings
+# Production Hardening TODO
 
-## Task
-Replace the fragile `mail()` function (which fails on XAMPP with "Failed to connect to mailserver at localhost port 25") with PHPMailer using dynamic SMTP settings configurable from the admin dashboard.
+## Priority 1 (Critical)
+- [x] Move credentials to `.env` (git-ignored) with `.env.example`
+- [x] Harden `getDB()` error handling (don't expose exception text)
+- [ ] Add CSRF to all admin POST actions (appointments, therapy_bookings, manage_*)
+- [ ] Convert GET-based deletes/toggles to POST with CSRF
+- [ ] Add CSRF to gallery AJAX handler
+- [ ] Set `session.cookie_secure` based on HTTPS
 
-## Steps
-- [x] Download & extract PHPMailer into `includes/phpmailer/`
-- [x] Add SMTP default constants to `includes/config.php`
-- [x] Add a PHPMailer autoloader (`includes/phpmailer/autoload.php`)
-- [x] Rewrite `sendEmail()` in `includes/functions.php` to use PHPMailer + settings table, with graceful error handling
-- [x] Add convenience functions: `getSmtpSettings()`, `sendTestEmail()`
-- [x] Create `admin/settings.php` page with SMTP configuration form + test email button
-- [x] Add "Settings" link to the admin dashboard sidebar
-- [x] Add default SMTP settings rows to `sql/database.sql`
-- [x] Verify PHPMailer loads correctly (v6.9.1)
-- [ ] Test the settings page, send a test email, verify no warning appears
+## Priority 2 (High)
+- [ ] Add brute-force protection to admin login
+- [ ] Add security headers (CSP, X-Frame-Options, etc.)
+- [ ] Validate real image content on upload (finfo)
+- [ ] Enforce slug uniqueness on articles
+
+## Priority 3 (Medium)
+- [ ] Harden SITE_URL (configurable constant)
