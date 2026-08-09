@@ -242,7 +242,8 @@ table tbody tr:hover {
         <a href="<?php echo SITE_URL; ?>/admin/manage_articles.php">Articles</a>
 <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">Events</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_gallery.php">Gallery</a>
-        <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php">Testimonials</a>
+<a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php">Testimonials</a>
+        <a href="<?php echo SITE_URL; ?>/admin/settings.php">Account &amp; Settings</a>
         <hr style="border-color:rgba(255,255,255,0.1);margin:1.5rem 0;">
         <a href="<?php echo SITE_URL; ?>/index.php">View Site</a>
         <a href="<?php echo SITE_URL; ?>/admin/logout.php">Logout</a>

@@ -63,6 +63,99 @@ function requireAdmin()
 }
 
 /**
+ * Get the logged-in admin profile record.
+ * @return array|null
+ */
+function getAdminProfile($adminId = null)
+{
+    $db = getDB();
+    $adminId = $adminId ?? ($_SESSION['admin_id'] ?? null);
+    if (!$adminId) {
+        return null;
+    }
+    $stmt = $db->prepare("SELECT id, username, full_name, email, created_at FROM admin_users WHERE id = ?");
+    $stmt->execute([$adminId]);
+    return $stmt->fetch();
+}
+
+/**
+ * Update the admin account profile (full_name, email, username).
+ * Returns ['success' => bool, 'message' => string].
+ */
+function updateAdminProfile($fullName, $email, $username)
+{
+    $db = getDB();
+    $adminId = $_SESSION['admin_id'] ?? null;
+    if (!$adminId) {
+        return ['success' => false, 'message' => 'Not authenticated.'];
+    }
+
+    $fullName = trim($fullName ?? '');
+    $email = trim($email ?? '');
+    $username = trim($username ?? '');
+
+    if ($username === '') {
+        return ['success' => false, 'message' => 'Username is required.'];
+    }
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return ['success' => false, 'message' => 'Please enter a valid email address.'];
+    }
+
+    // Ensure username isn't taken by another admin
+    $stmt = $db->prepare("SELECT id FROM admin_users WHERE username = ? AND id != ?");
+    $stmt->execute([$username, $adminId]);
+    if ($stmt->fetch()) {
+        return ['success' => false, 'message' => 'That username is already in use.'];
+    }
+
+    $stmt = $db->prepare("UPDATE admin_users SET full_name = ?, email = ?, username = ? WHERE id = ?");
+    $stmt->execute([$fullName ?: null, $email, $username, $adminId]);
+
+    // Update session username so the header reflects the change
+    $_SESSION['admin_username'] = $username;
+
+    return ['success' => true, 'message' => 'Your profile has been updated successfully.'];
+}
+
+/**
+ * Change the admin password after verifying the current password.
+ * Returns ['success' => bool, 'message' => string].
+ */
+function updateAdminPassword($currentPassword, $newPassword, $confirmPassword)
+{
+    $db = getDB();
+    $adminId = $_SESSION['admin_id'] ?? null;
+    if (!$adminId) {
+        return ['success' => false, 'message' => 'Not authenticated.'];
+    }
+
+    if ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
+        return ['success' => false, 'message' => 'All password fields are required.'];
+    }
+    if ($newPassword !== $confirmPassword) {
+        return ['success' => false, 'message' => 'New password and confirmation do not match.'];
+    }
+    if (strlen($newPassword) < 6) {
+        return ['success' => false, 'message' => 'New password must be at least 6 characters long.'];
+    }
+
+    // Verify current password
+    $stmt = $db->prepare("SELECT password_hash FROM admin_users WHERE id = ?");
+    $stmt->execute([$adminId]);
+    $row = $stmt->fetch();
+    if (!$row || !password_verify($currentPassword, $row['password_hash'])) {
+        return ['success' => false, 'message' => 'Your current password is incorrect.'];
+    }
+
+    // Update password
+    $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
+    $stmt = $db->prepare("UPDATE admin_users SET password_hash = ? WHERE id = ?");
+    $stmt->execute([$newHash, $adminId]);
+
+    return ['success' => true, 'message' => 'Your password has been changed successfully.'];
+}
+
+/**
  * Complete admin logout - destroys session securely
  */
 function adminLogout($redirectMessage = '')

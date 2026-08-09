@@ -1,9 +1,8 @@
 <?php
 
 /**
- * Elpis Counselling Centre - Admin Settings (Email / Profile)
- * Simple, non-technical email settings page.
- * Emails are always sent to elpiscounselling24@gmail.com.
+ * Elpis Counselling Centre - Admin Account & Settings
+ * Manage the admin account (name, email, username, password) and SMTP email settings.
  */
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/functions.php';
@@ -19,18 +18,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $message = 'Security token mismatch. Please refresh the page and try again.';
         $messageType = 'error';
     } elseif (isset($_POST['save_profile'])) {
-        $fromName = trim($_POST['from_name'] ?? '');
+        // Update account profile (full_name, email, username)
+        $fullName = trim($_POST['full_name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $username = trim($_POST['username'] ?? '');
+
+        $result = updateAdminProfile($fullName, $email, $username);
+        $message = $result['message'];
+        $messageType = $result['success'] ? 'success' : 'error';
+    } elseif (isset($_POST['change_password'])) {
+        // Change admin password
+        $current = $_POST['current_password'] ?? '';
+        $new = $_POST['new_password'] ?? '';
+        $confirm = $_POST['confirm_password'] ?? '';
+
+        $result = updateAdminPassword($current, $new, $confirm);
+        $message = $result['message'];
+        $messageType = $result['success'] ? 'success' : 'error';
+    } elseif (isset($_POST['save_email'])) {
+        // Update SMTP / from-email settings
         $fromEmail = trim($_POST['from_email'] ?? '');
 
-if ($fromEmail && filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
-            setSetting('smtp_from_name', $fromName ?: SITE_NAME);
+        if ($fromEmail && filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+            setSetting('smtp_from_name', trim($_POST['from_name'] ?? '') ?: SITE_NAME);
             setSetting('smtp_from_email', $fromEmail);
 
             // SMTP server settings
             $smtpHost = trim($_POST['smtp_host'] ?? SMTP_HOST);
             $smtpPort = (int)($_POST['smtp_port'] ?? SMTP_PORT);
             $smtpUsername = trim($_POST['smtp_username'] ?? SMTP_USERNAME);
-            $smtpPassword = trim($_POST['smtp_password'] ?? SMTP_PASSWORD);
+            $smtpPassword = trim($_POST['smtp_password'] ?? '');
             $smtpEncryption = trim($_POST['smtp_encryption'] ?? SMTP_ENCRYPTION);
 
             setSetting('smtp_host', $smtpHost);
@@ -44,7 +61,7 @@ if ($fromEmail && filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
             $message = 'Your email settings have been saved successfully.';
             $messageType = 'success';
         } else {
-            $message = 'Please enter a valid email address.';
+            $message = 'Please enter a valid From email address.';
             $messageType = 'error';
         }
     } elseif (isset($_POST['send_test'])) {
@@ -60,8 +77,15 @@ if ($fromEmail && filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
     }
 }
 
+// Load current admin profile
+$profile = getAdminProfile();
+$full_name = $profile['full_name'] ?? '';
+$email = $profile['email'] ?? '';
+$username = $profile['username'] ?? '';
+
+// Load SMTP settings
 $fromName = getSetting('smtp_from_name', SITE_NAME);
-$fromEmail = getSetting('smtp_from_email', ADMIN_EMAIL);
+$fromEmail = getSetting('smtp_from_email', $email ?: ADMIN_EMAIL);
 $smtpHost = getSetting('smtp_host', SMTP_HOST);
 $smtpPort = getSetting('smtp_port', SMTP_PORT);
 $smtpUsername = getSetting('smtp_username', SMTP_USERNAME);
@@ -297,7 +321,7 @@ $isAdminPage = true;
         <a href="<?php echo SITE_URL; ?>/admin/manage_events.php">Events</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_gallery.php">Gallery</a>
         <a href="<?php echo SITE_URL; ?>/admin/manage_testimonials.php">Testimonials</a>
-        <a href="<?php echo SITE_URL; ?>/admin/settings.php" class="active">Settings</a>
+        <a href="<?php echo SITE_URL; ?>/admin/settings.php" class="active">Account &amp; Settings</a>
         <hr style="border-color:rgba(255,255,255,0.1);margin:1.5rem 0;">
         <a href="<?php echo SITE_URL; ?>/index.php">View Site</a>
         <a href="<?php echo SITE_URL; ?>/admin/logout.php">Logout</a>
@@ -305,18 +329,78 @@ $isAdminPage = true;
 
     <div class="admin-content">
         <div class="admin-header">
-            <h1>Settings</h1>
-            <span style="color:#999;font-size:0.9rem;">Welcome, <?php echo h($_SESSION['admin_username']); ?></span>
+            <h1>Account &amp; Settings</h1>
+            <span style="color:#999;font-size:0.9rem;">Welcome, <?php echo h($username ?: ($_SESSION['admin_username'] ?? '')); ?></span>
         </div>
 
         <?php if ($message): ?>
         <div class="alert alert-<?php echo $messageType; ?>"><?php echo h($message); ?></div>
         <?php endif; ?>
 
-        <!-- Profile / From details -->
+        <!-- Account Profile -->
+        <div class="settings-card">
+            <h3>&#128100; Account Profile</h3>
+            <p class="card-desc">Update your name, email, and username used to log in to the admin panel.</p>
+
+            <form method="POST" action="">
+                <?php echo csrfField(); ?>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="full_name">Full Name</label>
+                        <input type="text" id="full_name" name="full_name" class="form-control"
+                            value="<?php echo h($full_name); ?>" placeholder="Elpis Admin">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-control"
+                            value="<?php echo h($email); ?>" placeholder="you@example.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-control"
+                        value="<?php echo h($username); ?>" placeholder="admin">
+                    <p class="hint">Your login username.</p>
+                </div>
+
+                <button type="submit" name="save_profile" value="1" class="btn btn-primary">Save Profile</button>
+            </form>
+        </div>
+
+        <!-- Change Password -->
+        <div class="settings-card">
+            <h3>&#128274; Change Password</h3>
+            <p class="card-desc">Update your admin login password.</p>
+
+            <form method="POST" action="">
+                <?php echo csrfField(); ?>
+                <div class="form-group">
+                    <label for="current_password">Current Password</label>
+                    <input type="password" id="current_password" name="current_password" class="form-control"
+                        autocomplete="current-password" placeholder="Enter current password" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="new_password">New Password</label>
+                        <input type="password" id="new_password" name="new_password" class="form-control"
+                            autocomplete="new-password" placeholder="At least 6 characters" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm New Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control"
+                            autocomplete="new-password" placeholder="Repeat new password" required>
+                    </div>
+                </div>
+
+                <button type="submit" name="change_password" value="1" class="btn btn-secondary">Change Password</button>
+            </form>
+        </div>
+
+        <!-- Email / SMTP Settings -->
         <div class="settings-card">
             <h3>&#9993; Email Settings</h3>
-            <p class="card-desc">Manage the name and email address used when sending notifications.</p>
+            <p class="card-desc">Manage the name/email used when sending notifications and the SMTP server details.</p>
 
             <div class="info-box">
                 &#128231; All notifications (new bookings, contact messages, and inquiries) are sent to
@@ -327,16 +411,16 @@ $isAdminPage = true;
                 <?php echo csrfField(); ?>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="from_name">Your Name / From Name</label>
+                        <label for="from_name">From Name</label>
                         <input type="text" id="from_name" name="from_name" class="form-control"
                             value="<?php echo h($fromName); ?>" placeholder="Elpis Counselling Centre">
                         <p class="hint">The name shown in the "From" field of emails.</p>
                     </div>
-<div class="form-group">
-                        <label for="from_email">Reply-to Email</label>
+                    <div class="form-group">
+                        <label for="from_email">From Email</label>
                         <input type="email" id="from_email" name="from_email" class="form-control"
                             value="<?php echo h($fromEmail); ?>" placeholder="you@example.com">
-                        <p class="hint">Where replies to your emails should go.</p>
+                        <p class="hint">The address shown as the sender.</p>
                     </div>
                 </div>
 
@@ -344,8 +428,8 @@ $isAdminPage = true;
 
                 <h4 style="color:#3F5195;margin-bottom:1rem;">&#128273; SMTP Server Settings</h4>
                 <p style="color:#999;font-size:0.85rem;margin-bottom:1.5rem;">
-                    Configure the outgoing mail server used to deliver notifications. For Gmail, use
-                    <code>smtp.gmail.com</code>, port <code>587</code> with TLS and an App Password.
+                    Configure the outgoing mail server. For Gmail, use <code>smtp.gmail.com</code>, port
+                    <code>587</code> with TLS and an App Password.
                 </p>
 
                 <div class="form-row">
@@ -384,7 +468,7 @@ $isAdminPage = true;
                     </select>
                 </div>
 
-                <button type="submit" name="save_profile" value="1" class="btn btn-primary">Save Settings</button>
+                <button type="submit" name="save_email" value="1" class="btn btn-primary">Save Email Settings</button>
             </form>
         </div>
 

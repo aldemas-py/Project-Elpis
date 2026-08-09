@@ -39,8 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Regenerate session ID to prevent session fixation attacks
             session_regenerate_id(true);
 
-            $_SESSION['admin_id'] = $user['id'];
+$_SESSION['admin_id'] = $user['id'];
             $_SESSION['admin_username'] = $user['username'];
+            $_SESSION['admin_fullname'] = $user['full_name'] ?? '';
+            $_SESSION['admin_email'] = $user['email'] ?? '';
             $_SESSION['last_activity'] = time(); // Track activity for 5-min timeout
 
             header('Location: ' . SITE_URL . '/admin/dashboard.php');
