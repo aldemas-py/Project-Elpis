@@ -1,18 +1,16 @@
-# TODO - Contact Info Update
+# Elpis Counselling Centre - SMTP Email Fix & Admin Settings
+
+## Task
+Replace the fragile `mail()` function (which fails on XAMPP with "Failed to connect to mailserver at localhost port 25") with PHPMailer using dynamic SMTP settings configurable from the admin dashboard.
 
 ## Steps
-- [x] Update `includes/config.php` ADMIN_EMAIL to elpiscounselling24@gmail.com
-- [x] Update `contact.php` - Call Us, Email Us, Visit Us, add WhatsApp link
-- [x] Update `includes/footer.php` - Contact Info block + WhatsApp social link
-- [x] Update `booking.php` - Call, Email, Visit contact details + WhatsApp link
-- [x] Fix "Undefined array key room" warning in `booking.php` (line 663)
-- [x] Verify changes in browser
-
-## Additional - Admin Therapy Room Toggles
-- [x] Add per-room visibility toggles (Room 1 / Room 2) in `admin/dashboard.php`
-- [x] Keep overall master toggle for the therapy booking module
-- [x] Booking page already uses `getVisibleTherapyRooms()` to show only visible rooms
-
-## Additional - Footer Designer Credit
-- [x] Added "Designed by Njenga Sam" credit in `includes/footer.php` with link to https://njengasam.com/about.php
-- [x] Added `.footer-designed` styling in `assets/css/style.css`
+- [x] Download & extract PHPMailer into `includes/phpmailer/`
+- [x] Add SMTP default constants to `includes/config.php`
+- [x] Add a PHPMailer autoloader (`includes/phpmailer/autoload.php`)
+- [x] Rewrite `sendEmail()` in `includes/functions.php` to use PHPMailer + settings table, with graceful error handling
+- [x] Add convenience functions: `getSmtpSettings()`, `sendTestEmail()`
+- [x] Create `admin/settings.php` page with SMTP configuration form + test email button
+- [x] Add "Settings" link to the admin dashboard sidebar
+- [x] Add default SMTP settings rows to `sql/database.sql`
+- [x] Verify PHPMailer loads correctly (v6.9.1)
+- [ ] Test the settings page, send a test email, verify no warning appears

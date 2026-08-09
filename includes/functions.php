@@ -171,31 +171,149 @@ function getTestimonials()
 }
 
 /**
- * Send email (basic mail function)
+ * Send an HTML email using PHPMailer over SMTP.
+ * Uses the SMTP settings defined in config.php.
+ *
+ * Failures are logged to a file rather than emitting PHP warnings, so a
+ * misconfigured SMTP server never breaks the public forms.
+ *
+ * @return bool True on success, false on failure.
  */
 function sendEmail($to, $subject, $message)
 {
-    $headers = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-    $headers .= "From: " . SITE_NAME . " <" . ADMIN_EMAIL . ">\r\n";
+    require_once __DIR__ . '/phpmailer/autoload.php';
 
-    $htmlMessage = "
-    <html>
-    <body style='font-family: Arial, sans-serif; color: #263447;'>
-        <div style='max-width: 600px; margin: 0 auto; background: #FAF8F2; padding: 30px;'>
-            <h2 style='color: #3F5195;'>" . SITE_NAME . "</h2>
-            <hr style='border: 1px solid #E76F51;'>
-            <div style='padding: 20px 0;'>" . nl2br($message) . "</div>
-            <hr style='border: 1px solid #D7DDD9;'>
-            <p style='color: #4FA08A; font-size: 12px;'>
-                Krishna Centre, 2nd Floor, Westlands, Nairobi<br>
-                " . ADMIN_EMAIL . "
-            </p>
-        </div>
-    </body>
-    </html>";
+    // SMTP settings from the settings table (editable by admin), falling back
+    // to the constants defined in config.php.
+    $smtpHost       = getSetting('smtp_host', SMTP_HOST);
+    $smtpPort       = (int) getSetting('smtp_port', SMTP_PORT);
+    $smtpUsername   = getSetting('smtp_username', SMTP_USERNAME);
+    $smtpPassword   = getSetting('smtp_password', SMTP_PASSWORD);
+    $smtpEncryption = getSetting('smtp_encryption', SMTP_ENCRYPTION);
+    $smtpFromEmail  = getSetting('smtp_from_email', SMTP_FROM_EMAIL);
+    $smtpFromName   = getSetting('smtp_from_name', SMTP_FROM_NAME);
 
-    return mail($to, $subject, $htmlMessage, $headers);
+    $mail = new \PHPMailer\PHPMailer\PHPMailer(true); // Enable exceptions for graceful handling
+
+    try {
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host       = $smtpHost;
+        $mail->SMTPAuth   = true;
+        $mail->Username   = $smtpUsername;
+        $mail->Password   = $smtpPassword;
+
+        if (!empty($smtpEncryption)) {
+            $mail->SMTPSecure = $smtpEncryption;
+        }
+        $mail->Port = $smtpPort;
+
+        // "From" details
+        $mail->setFrom($smtpFromEmail, $smtpFromName);
+
+        // Recipient
+        $mail->addAddress($to);
+
+        // Content (HTML)
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+
+        $htmlMessage = "
+        <html>
+        <body style='font-family: Arial, sans-serif; color: #263447;'>
+            <div style='max-width: 600px; margin: 0 auto; background: #FAF8F2; padding: 30px;'>
+                <h2 style='color: #3F5195;'>" . SITE_NAME . "</h2>
+                <hr style='border: 1px solid #E76F51;'>
+                <div style='padding: 20px 0;'>" . nl2br($message) . "</div>
+                <hr style='border: 1px solid #D7DDD9;'>
+                <p style='color: #4FA08A; font-size: 12px;'>
+                    Krishna Centre, 2nd Floor, Westlands, Nairobi<br>
+                    " . ADMIN_EMAIL . "
+                </p>
+            </div>
+        </body>
+        </html>";
+
+        $mail->Body = $htmlMessage;
+
+        return $mail->send();
+    } catch (\Exception $e) {
+        // Log the error instead of showing a PHP warning on the public site.
+        logEmailError('sendEmail to ' . $to . ' failed: ' . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Generate (or reuse) a CSRF token for form security.
+ */
+function generateCsrfToken()
+{
+    startSession();
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+/**
+ * Verify a submitted CSRF token matches the stored session token.
+ */
+function verifyCsrfToken($token)
+{
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], (string) $token);
+}
+
+/**
+ * Return a hidden CSRF form field for use in HTML forms.
+ */
+function csrfField()
+{
+    return '<input type="hidden" name="csrf_token" value="' . h(generateCsrfToken()) . '">';
+}
+
+/**
+ * Honeypot spam check. Returns true if the hidden honeypot field was filled
+ * (bots fill every field, humans do not see it).
+ */
+function isSpamSubmission($honeypot)
+{
+    return !empty($honeypot);
+}
+
+/**
+ * Simple session-based rate limiting to prevent form spam.
+ * Limits submissions to $max per $windowSeconds.
+ */
+function isRateLimited($max = 5, $windowSeconds = 300)
+{
+    startSession();
+    $now = time();
+    $window = $_SESSION['form_submissions'] ?? [];
+    $window = array_filter($window, function ($t) use ($now, $windowSeconds) {
+        return ($now - $t) < $windowSeconds;
+    });
+    if (count($window) >= $max) {
+        $_SESSION['form_submissions'] = array_values($window);
+        return true;
+    }
+    $window[] = $now;
+    $_SESSION['form_submissions'] = array_values($window);
+    return false;
+}
+
+/**
+ * Append an error message to the email log file.
+ */
+function logEmailError($message)
+{
+    $logDir = __DIR__ . '/../storage/logs';
+    if (!is_dir($logDir)) {
+        @mkdir($logDir, 0755, true);
+    }
+    $logFile = $logDir . '/email.log';
+    $line = '[' . date('Y-m-d H:i:s') . '] ' . $message . PHP_EOL;
+@file_put_contents($logFile, $line, FILE_APPEND);
 }
 
 /**

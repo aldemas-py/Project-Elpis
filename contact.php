@@ -14,9 +14,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
     $subject = trim($_POST['subject'] ?? '');
-    $contact_message = trim($_POST['message'] ?? '');
+$contact_message = trim($_POST['message'] ?? '');
 
-    if ($name && $email && $contact_message) {
+    // Security checks: CSRF + honeypot + rate limit
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = "Security token mismatch. Please refresh the page and try again.";
+        $messageType = 'error';
+    } elseif (isSpamSubmission($_POST['website'] ?? '')) {
+        $message = "Your submission looks automated. Please try again.";
+        $messageType = 'error';
+    } elseif (isRateLimited()) {
+        $message = "You have sent too many messages. Please try again later.";
+        $messageType = 'error';
+    } elseif ($name && $email && $contact_message) {
         try {
             $db = getDB();
             $stmt = $db->prepare("INSERT INTO contacts (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)");
@@ -114,7 +124,13 @@ include __DIR__ . '/includes/header.php';
                 <div class="alert alert-<?php echo $messageType; ?>"><?php echo h($message); ?></div>
                 <?php endif; ?>
 
-                <form method="POST" action="" data-validate>
+<form method="POST" action="" data-validate>
+                    <?php echo csrfField(); ?>
+                    <!-- Honeypot field (hidden from humans, traps bots) -->
+                    <div style="position:absolute;left:-9999px;" aria-hidden="true">
+                        <label for="website">Website</label>
+                        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="name">Full Name *</label>

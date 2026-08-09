@@ -24,7 +24,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['book_therapy_room']))
     $start_time = trim($_POST['start_time'] ?? '');
     $hours = (int)($_POST['hours'] ?? 1);
 
-    if ($name && $email && $phone && $booking_date && $start_time) {
+    // Security checks: CSRF + honeypot + rate limit
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $therapyMessage = "Security token mismatch. Please refresh the page and try again.";
+        $therapyMessageType = 'error';
+    } elseif (isSpamSubmission($_POST['website'] ?? '')) {
+        $therapyMessage = "Your submission looks automated. Please try again.";
+        $therapyMessageType = 'error';
+    } elseif (isRateLimited()) {
+        $therapyMessage = "You have sent too many requests. Please try again later.";
+        $therapyMessageType = 'error';
+    } elseif ($name && $email && $phone && $booking_date && $start_time) {
         try {
             $db = getDB();
             $hourlyRate = 500;
@@ -80,7 +90,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['book_session'])) {
     $preferred_date = trim($_POST['preferred_date'] ?? '');
     $message_text = trim($_POST['message'] ?? '');
 
-    if ($name && $email && $phone) {
+    // Security checks: CSRF + honeypot + rate limit
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = "Security token mismatch. Please refresh the page and try again.";
+        $messageType = 'error';
+    } elseif (isSpamSubmission($_POST['website'] ?? '')) {
+        $message = "Your submission looks automated. Please try again.";
+        $messageType = 'error';
+    } elseif (isRateLimited()) {
+        $message = "You have sent too many requests. Please try again later.";
+        $messageType = 'error';
+    } elseif ($name && $email && $phone) {
         try {
             $db = getDB();
             $stmt = $db->prepare("INSERT INTO appointments (name, email, phone, service, preferred_date, message) VALUES (?, ?, ?, ?, ?, ?)");
@@ -461,7 +481,13 @@ include __DIR__ . '/includes/header.php';
                     <div class="alert alert-<?php echo $messageType; ?>"><?php echo h($message); ?></div>
                     <?php endif; ?>
 
-                    <form method="POST" action="" data-validate>
+<form method="POST" action="" data-validate>
+                        <?php echo csrfField(); ?>
+                        <!-- Honeypot field (hidden from humans, traps bots) -->
+                        <div style="position:absolute;left:-9999px;" aria-hidden="true">
+                            <label for="website">Website</label>
+                            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                        </div>
                         <input type="hidden" name="book_session" value="1">
                         <div class="form-row">
                             <div class="form-group">
@@ -564,7 +590,13 @@ include __DIR__ . '/includes/header.php';
 
             <!-- Booking Form -->
             <div class="calendar-section">
-                <form method="POST" action="" data-validate>
+<form method="POST" action="" data-validate>
+                    <?php echo csrfField(); ?>
+                    <!-- Honeypot field (hidden from humans, traps bots) -->
+                    <div style="position:absolute;left:-9999px;" aria-hidden="true">
+                        <label for="website">Website</label>
+                        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
                     <input type="hidden" name="book_therapy_room" value="1">
                     <input type="hidden" name="booking_date" id="selected_date">
                     <input type="hidden" name="start_time" id="selected_time">

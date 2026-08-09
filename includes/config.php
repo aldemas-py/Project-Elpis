@@ -25,6 +25,15 @@ $basePath = dirname($relativePath);
 define('SITE_URL', $protocol . '://' . $host . $basePath);
 define('ADMIN_EMAIL', 'elpiscounselling24@gmail.com');
 
+// SMTP Configuration (defaults - overridable via admin Settings page / settings table)
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_PORT', 587);
+define('SMTP_USERNAME', 'elpiscounselling24@gmail.com');
+define('SMTP_PASSWORD', 'your_gmail_app_password'); // Use a Gmail App Password for 2FA accounts
+define('SMTP_ENCRYPTION', 'tls'); // 'tls', 'ssl', or ''
+define('SMTP_FROM_EMAIL', 'elpiscounselling24@gmail.com');
+define('SMTP_FROM_NAME', 'Elpis Counselling Centre');
+
 // M-Pesa Daraja API Configuration (Sandbox)
 define('MPESA_CONSUMER_KEY', 'your_consumer_key');
 define('MPESA_CONSUMER_SECRET', 'your_consumer_secret');

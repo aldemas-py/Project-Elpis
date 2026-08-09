@@ -20,3 +20,6 @@ Thumbs.db
 # Logs & temp
 *.log
 task.txt
+
+# Application storage (runtime logs, cached data, etc.)
+storage/
