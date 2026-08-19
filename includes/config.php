@@ -61,11 +61,12 @@ $__isHttps = (
     || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
 );
 
+
 // Database credentials (override via env)
 define('DB_HOST', cfgEnv('DB_HOST', 'localhost'));
-define('DB_NAME', cfgEnv('DB_NAME', 'elpis_counselling'));
-define('DB_USER', cfgEnv('DB_USER', 'root'));
-define('DB_PASS', cfgEnv('DB_PASS', ''));
+define('DB_NAME', cfgEnv('DB_NAME', 'siazxqeu_elpis'));
+define('DB_USER', cfgEnv('DB_USER', 'siazxqeu_elpis'));
+define('DB_PASS', cfgEnv('DB_PASS', 'YAnXw@6^-ocT+y7'));
 define('DB_CHARSET', cfgEnv('DB_CHARSET', 'utf8mb4'));
 
 // Site configuration
