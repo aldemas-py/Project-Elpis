@@ -2,6 +2,8 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/siazxqeu/public_html/
+    
+    # PHP files
     - /bin/cp index.php $DEPLOYPATH
     - /bin/cp about.php $DEPLOYPATH
     - /bin/cp article.php $DEPLOYPATH
@@ -10,6 +12,34 @@ deployment:
     - /bin/cp events.php $DEPLOYPATH
     - /bin/cp booking.php $DEPLOYPATH
     - /bin/cp services.php $DEPLOYPATH
+    - /bin/cp gallery.php $DEPLOYPATH
+    
+    # Static files (ADD THESE)
+    - /bin/cp favicon.png $DEPLOYPATH 2>/dev/null || true
+    - /bin/cp robots.txt $DEPLOYPATH 2>/dev/null || true
+    - /bin/cp sitemap.xml $DEPLOYPATH 2>/dev/null || true
+    - /bin/cp 404.shtml $DEPLOYPATH 2>/dev/null || true
+    
+    # Directories
+    - /bin/cp -R images $DEPLOYPATH
+    - /bin/cp -R includes $DEPLOYPATH
+    - /bin/cp -R admin $DEPLOYPATH
+    - /bin/cp -R assets $DEPLOYPATH
+    - /bin/cp -R uploads $DEPLOYPATH
+
+# ---
+# deployment:
+#   tasks:
+#     - export DEPLOYPATH=/home/siazxqeu/public_html/
+#     - /bin/cp index.php $DEPLOYPATH
+#     - /bin/cp about.php $DEPLOYPATH
+#     - /bin/cp article.php $DEPLOYPATH
+#     - /bin/cp articles.php $DEPLOYPATH
+#     - /bin/cp contact.php $DEPLOYPATH
+#     - /bin/cp events.php $DEPLOYPATH
+#     - /bin/cp booking.php $DEPLOYPATH
+#     - /bin/cp services.php $DEPLOYPATH
+#     - /bin/cp gallery.php $DEPLOYPATH
 
     # Remove sensitive / dev-only files from the live server
     # - /bin/rm -f $DEPLOYPATH/setup.php
@@ -24,10 +54,10 @@ deployment:
     # - /bin/rm -rf $DEPLOYPATH/assets
     # - /bin/rm -rf $DEPLOYPATH/uploads
 
-    - /bin/cp -R images $DEPLOYPATH
-    - /bin/cp -R includes $DEPLOYPATH
-    - /bin/cp -R admin $DEPLOYPATH
-    - /bin/cp -R assets $DEPLOYPATH
-    - /bin/cp -R uploads $DEPLOYPATH
-</content>
+#     - /bin/cp -R images $DEPLOYPATH
+#     - /bin/cp -R includes $DEPLOYPATH
+#     - /bin/cp -R admin $DEPLOYPATH
+#     - /bin/cp -R assets $DEPLOYPATH
+#     - /bin/cp -R uploads $DEPLOYPATH
+# </content>
 
