@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/njengas2/public_html/
+    - export DEPLOYPATH=/home/siazxque/public_html/
     - /bin/cp index.php $DEPLOYPATH
     - /bin/cp about.php $DEPLOYPATH
     - /bin/cp article.php $DEPLOYPATH
