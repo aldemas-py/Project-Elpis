@@ -12,17 +12,17 @@ deployment:
     - /bin/cp services.php $DEPLOYPATH
 
     # Remove sensitive / dev-only files from the live server
-    - /bin/rm -f $DEPLOYPATH/setup.php
-    - /bin/rm -rf $DEPLOYPATH/sql
+    # - /bin/rm -f $DEPLOYPATH/setup.php
+    # - /bin/rm -rf $DEPLOYPATH/sql
     # - /bin/rm -f $DEPLOYPATH/.cp.yml
     # - /bin/rm -f $DEPLOYPATH/.cpanel.yml
 
     # Refresh deployment directories to avoid stale files
-    - /bin/rm -rf $DEPLOYPATH/images
-    - /bin/rm -rf $DEPLOYPATH/includes
-    - /bin/rm -rf $DEPLOYPATH/admin
-    - /bin/rm -rf $DEPLOYPATH/assets
-    - /bin/rm -rf $DEPLOYPATH/uploads
+    # - /bin/rm -rf $DEPLOYPATH/images
+    # - /bin/rm -rf $DEPLOYPATH/includes
+    # - /bin/rm -rf $DEPLOYPATH/admin
+    # - /bin/rm -rf $DEPLOYPATH/assets
+    # - /bin/rm -rf $DEPLOYPATH/uploads
 
     - /bin/cp -R images $DEPLOYPATH
     - /bin/cp -R includes $DEPLOYPATH
