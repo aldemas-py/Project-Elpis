@@ -64,8 +64,8 @@ $__isHttps = (
 
 // Database credentials (override via env)
 define('DB_HOST', cfgEnv('DB_HOST', 'localhost'));
-define('DB_NAME', cfgEnv('DB_NAME', 'siazxqeu_elpis'));
-define('DB_USER', cfgEnv('DB_USER', 'siazxqeu_elpis'));
+define('DB_NAME', cfgEnv('DB_NAME', 'siazxqeu_elpisCounselling'));
+define('DB_USER', cfgEnv('DB_USER', 'siazxqeu_elpis')); 
 define('DB_PASS', cfgEnv('DB_PASS', 'YAnXw@6^-ocT+y7'));
 define('DB_CHARSET', cfgEnv('DB_CHARSET', 'utf8mb4'));
 
